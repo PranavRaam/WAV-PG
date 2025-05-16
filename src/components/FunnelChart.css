@@ -3,6 +3,7 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
+  padding: 5px 0;
 }
 
 .funnel-container h3 {
@@ -28,8 +29,8 @@
   gap: 10px;
   flex: 1;
   position: relative;
-  padding: 1rem 0;
-  max-width: 450px;
+  padding: 0.5rem 0;
+  max-width: 420px;
   margin: 0 auto;
 }
 
@@ -37,12 +38,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 4rem;
+  height: 4.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   margin-bottom: 0;
-  perspective: 1000px;
 }
 
 /* First segment (Targets) */
@@ -51,52 +51,50 @@
   width: 100%;
   z-index: 5;
   clip-path: polygon(0% 0%, 100% 0%, 97% 100%, 3% 100%);
-  border-radius: 6px 6px 0 0;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px 8px 0 0;
+  border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 /* Second segment (Outreach) */
 .funnel-segment:nth-child(2) {
   background-color: #bfdbfe;
-  width: 90%;
+  width: 95%;
   z-index: 4;
-  clip-path: polygon(4% 0%, 96% 0%, 92% 100%, 8% 100%);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  clip-path: polygon(4% 0%, 96% 0%, 94% 100%, 6% 100%);
+  border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 /* Third segment (Pilots) */
 .funnel-segment:nth-child(3) {
   background-color: #93c5fd;
-  width: 80%;
+  width: 90%;
   z-index: 3;
-  clip-path: polygon(8% 0%, 92% 0%, 87% 100%, 13% 100%);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  clip-path: polygon(7% 0%, 93% 0%, 91% 100%, 9% 100%);
+  border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 /* Fourth segment (Onboarded) */
 .funnel-segment:nth-child(4) {
-  background-color: #3b82f6;
-  width: 70%;
+  background-color: #60a5fa;
+  width: 85%;
   z-index: 2;
-  clip-path: polygon(13% 0%, 87% 0%, 83% 100%, 17% 100%);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  padding: 0 5px;
+  clip-path: polygon(10% 0%, 90% 0%, 88% 100%, 12% 100%);
+  border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 /* Fifth segment (Premium) */
 .funnel-segment:nth-child(5) {
-  background-color: #1d4ed8;
-  width: 60%;
+  background-color: #3b82f6;
+  width: 80%;
   z-index: 1;
-  clip-path: polygon(18% 0%, 82% 0%, 78% 100%, 22% 100%);
-  border-radius: 0 0 6px 6px;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  padding: 0 5px;
+  clip-path: polygon(13% 0%, 87% 0%, 85% 100%, 15% 100%);
+  border-radius: 0 0 8px 8px;
+  border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 .funnel-segment:hover {
-  filter: brightness(1.05);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  filter: brightness(1.1);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
   z-index: 10;
 }
 
@@ -105,7 +103,7 @@
   width: 100%;
   justify-content: space-between;
   align-items: center;
-  padding: 0 15px;
+  padding: 0 20px;
   position: relative;
   z-index: 5;
 }
@@ -114,108 +112,33 @@
   font-weight: 700;
   font-size: 15px;
   color: #0f172a;
-  text-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
+  padding: 6px 10px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  margin-left: 0;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  letter-spacing: 0.5px;
+  min-width: 100px;
+  text-align: center;
 }
 
 .funnel-count {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   color: #0369a1;
   background-color: rgba(255, 255, 255, 0.95);
-  padding: 4px 12px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-/* Make bottom stage labels more visible */
-.funnel-segment:nth-child(4) .funnel-label,
-.funnel-segment:nth-child(5) .funnel-label {
-  color: white;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
-  font-weight: 800;
-}
-
-.conversion-indicator {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(255, 255, 255, 0.95);
-  color: #0369a1;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  z-index: 6;
-  border: 1px solid rgba(3, 105, 161, 0.2);
-  backface-visibility: visible;
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
-  animation: flip 0.6s ease-out forwards;
-  transform-style: preserve-3d;
-}
-
-.conversion-value {
-  display: inline-block;
-  transform-style: preserve-3d;
-}
-
-/* Position adjustments for each segment's conversion indicator */
-.funnel-segment:nth-child(2) .conversion-indicator {
-  left: 50%;
-}
-
-.funnel-segment:nth-child(3) .conversion-indicator {
-  left: 50%;
-}
-
-.funnel-segment:nth-child(4) .conversion-indicator {
-  left: 50%;
-  top: 50%;
-  background-color: white;
-  transform: translate(-50%, -50%);
-  z-index: 12;
-}
-
-.funnel-segment:nth-child(5) .conversion-indicator {
-  left: 50%;
-  top: 50%;
-  background-color: white;
-  transform: translate(-50%, -50%);
-  z-index: 12;
-}
-
-@keyframes flip {
-  0% {
-    transform: translate(-50%, -50%) rotateY(90deg);
-    opacity: 0;
-  }
-  100% {
-    transform: translate(-50%, -50%) rotateY(0deg);
-    opacity: 1;
-  }
-}
-
-/* Make the count boxes for lower stages more visible */
-.funnel-segment:nth-child(4) .funnel-count,
-.funnel-segment:nth-child(5) .funnel-count {
-  background-color: white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-  border: 1px solid #c7d2fe;
-  padding: 5px 14px;
-}
-
-.funnel-segment:nth-child(4) .conversion-indicator,
-.funnel-segment:nth-child(5) .conversion-indicator {
-  background-color: white;
-  padding: 5px 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  border: 1px solid #c7d2fe;
+  padding: 5px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  min-width: 50px;
+  text-align: center;
 }
 
 /* Ensure all funnel segments have proper spacing */
 .funnel-segment + .funnel-segment {
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 /* Styles for the last two stages (lower segments) */
@@ -231,26 +154,13 @@
 }
 
 .lower-segment .funnel-label {
-  font-size: 15px;
-  white-space: nowrap;
-  margin-left: 20px;
-  font-weight: 800;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.5px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: 1px solid rgba(59, 130, 246, 0.5);
 }
 
 .lower-segment .funnel-count {
-  margin-right: 10px;
-  min-width: 45px;
+  min-width: 70px;
   text-align: center;
-}
-
-.funnel-segment:nth-child(4) .conversion-indicator,
-.funnel-segment:nth-child(5) .conversion-indicator {
-  left: 50%;
-  background-color: white;
-  padding: 5px 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  border: 1px solid #c7d2fe;
-  z-index: 12;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 } 

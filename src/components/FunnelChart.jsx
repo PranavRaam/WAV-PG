@@ -11,14 +11,6 @@ const FunnelChart = ({ onStageClick }) => {
     { stage: 'Premium', count: 80, description: 'Premium members' }
   ];
 
-  // Calculate conversion rates between stages
-  const getConversionRate = (currentIndex) => {
-    if (currentIndex === 0) return 100;
-    const currentCount = funnelData[currentIndex].count;
-    const previousCount = funnelData[currentIndex - 1].count;
-    return Math.round((currentCount / previousCount) * 100);
-  };
-
   return (
     <div className="funnel-container">
       <div className="funnel-description">
@@ -30,17 +22,12 @@ const FunnelChart = ({ onStageClick }) => {
             key={index} 
             className={`funnel-segment ${index >= 3 ? 'lower-segment' : ''}`}
             onClick={() => onStageClick(item.stage)}
-            title={`${item.description} - ${index > 0 ? `${getConversionRate(index)}% conversion from previous stage` : ''}`}
+            title={`${item.description}`}
           >
             <div className="funnel-content">
               <div className="funnel-label">{item.stage}</div>
               <div className="funnel-count">{item.count}</div>
             </div>
-            {index > 0 && (
-              <div className="conversion-indicator">
-                <span className="conversion-value">{getConversionRate(index)}%</span>
-              </div>
-            )}
           </div>
         ))}
       </div>

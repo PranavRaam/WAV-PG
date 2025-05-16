@@ -5,6 +5,7 @@ import ConnectionsCard from './ConnectionsCard';
 import ReachOutsCard from './ReachOutsCard';
 import GrowthChart from './GrowthChart';
 import ResponseChart from './ResponseChart';
+import StageDetailView from './StageDetailView';
 import { FiFilter, FiCalendar, FiMap, FiActivity, FiRefreshCw, FiDownload, FiPieChart } from 'react-icons/fi';
 import './Dashboard.css';
 
@@ -270,10 +271,28 @@ const Dashboard = ({ onNavigateBack }) => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [showStageDetail, setShowStageDetail] = useState(false);
+  const [selectedEhr, setSelectedEhr] = useState('Athena');
+
+  const ehrOptions = [
+    'Athena',
+    'Kareo',
+    'Epic',
+    'Cerner',
+    'Allscripts',
+    'eClinicalWorks',
+    'NextGen',
+    'Meditech',
+    'Other'
+  ];
 
   const handleStageClick = (stage) => {
     setSelectedStage(stage);
-    // Here you would filter the data based on the selected stage
+    setShowStageDetail(true);
+  };
+
+  const handleCloseStageDetail = () => {
+    setShowStageDetail(false);
   };
 
   const handleRefresh = () => {
@@ -287,123 +306,144 @@ const Dashboard = ({ onNavigateBack }) => {
 
   return (
     <div className="dashboard-container">
-      <header className="dashboard-header">
-        <div className="header-left">
-          <button className="back-button" onClick={onNavigateBack}>
-            Back
-          </button>
-          <h1>PG Acquisition Intelligence</h1>
-        </div>
-        
-        <div className="header-actions">
-          <div className="last-updated">
-            Last updated: {lastUpdated.toLocaleTimeString()}
+      {showStageDetail && selectedStage ? (
+        <StageDetailView 
+          stage={selectedStage}
+          onClose={handleCloseStageDetail}
+        />
+      ) : (
+        <>
+          <header className="dashboard-header">
+            <div className="header-left">
+              <button className="back-button" onClick={onNavigateBack}>
+                Back
+              </button>
+              <h1>PG Acquisition Intelligence</h1>
+            </div>
+            
+            <div className="header-actions">
+              <div className="ehr-selector">
+                <select 
+                  value={selectedEhr} 
+                  onChange={(e) => setSelectedEhr(e.target.value)}
+                  className="ehr-dropdown"
+                >
+                  <option disabled>Select EHR System</option>
+                  {ehrOptions.map((ehr) => (
+                    <option key={ehr} value={ehr}>{ehr}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="last-updated">
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </div>
+              <button 
+                className={`refresh-button ${isLoading ? 'loading' : ''}`} 
+                onClick={handleRefresh} 
+                disabled={isLoading}
+              >
+                <FiRefreshCw className="refresh-icon" /> {isLoading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
+          </header>
+          
+          <div className="filter-card">
+            <div className="filter-section">
+              <button className={`filter-button ${activeFilter === 'all' ? 'active' : ''}`} onClick={() => setActiveFilter('all')}>
+                <FiActivity /> All Data
+              </button>
+              <button className={`filter-button ${activeFilter === 'region' ? 'active' : ''}`} onClick={() => setActiveFilter('region')}>
+                <FiMap /> By Region
+              </button>
+              <button className={`filter-button ${activeFilter === 'time' ? 'active' : ''}`} onClick={() => setActiveFilter('time')}>
+                <FiCalendar /> Last 30 Days
+              </button>
+              <button className={`filter-button ${activeFilter === 'custom' ? 'active' : ''}`} onClick={() => setActiveFilter('custom')}>
+                <FiFilter /> Custom Filter
+              </button>
+            </div>
+            <div className="action-section">
+              <button className="action-button" title="Export as CSV">
+                <FiDownload />
+              </button>
+              <button className="action-button" title="View Charts">
+                <FiPieChart />
+              </button>
+            </div>
           </div>
-          <button 
-            className={`refresh-button ${isLoading ? 'loading' : ''}`} 
-            onClick={handleRefresh} 
-            disabled={isLoading}
-          >
-            <FiRefreshCw className="refresh-icon" /> {isLoading ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
-      </header>
-      
-      <div className="filter-card">
-        <div className="filter-section">
-          <button className={`filter-button ${activeFilter === 'all' ? 'active' : ''}`} onClick={() => setActiveFilter('all')}>
-            <FiActivity /> All Data
-          </button>
-          <button className={`filter-button ${activeFilter === 'region' ? 'active' : ''}`} onClick={() => setActiveFilter('region')}>
-            <FiMap /> By Region
-          </button>
-          <button className={`filter-button ${activeFilter === 'time' ? 'active' : ''}`} onClick={() => setActiveFilter('time')}>
-            <FiCalendar /> Last 30 Days
-          </button>
-          <button className={`filter-button ${activeFilter === 'custom' ? 'active' : ''}`} onClick={() => setActiveFilter('custom')}>
-            <FiFilter /> Custom Filter
-          </button>
-        </div>
-        <div className="action-section">
-          <button className="action-button" title="Export as CSV">
-            <FiDownload />
-          </button>
-          <button className="action-button" title="View Charts">
-            <FiPieChart />
-          </button>
-        </div>
-      </div>
-      
-      {selectedStage && (
-        <div className="selection-card">
-          <div className="selection-info">
-            Currently viewing data for <strong>{selectedStage}</strong> stage
+          
+          {selectedStage && !showStageDetail && (
+            <div className="selection-card">
+              <div className="selection-info">
+                Currently viewing data for <strong>{selectedStage}</strong> stage
+              </div>
+              <button className="clear-selection" onClick={() => setSelectedStage(null)}>Clear Filter</button>
+            </div>
+          )}
+          
+          <div className="dashboard-grid">
+            <div className="card funnel-card">
+              <div className="card-header">
+                <h2>Acquisition Funnel Stages</h2>
+                <div className="card-subtitle">Click on a stage to filter dashboard data</div>
+              </div>
+              <div className="card-content">
+                <FunnelChart onStageClick={handleStageClick} />
+              </div>
+            </div>
+            
+            <div className="card distribution-card">
+              <div className="card-header">
+                <h2>Vertical Distribution & Patient Counts</h2>
+                <div className="card-subtitle">Relationship between verticals (PG, CHC, VA) and patient counts</div>
+              </div>
+              <div className="card-content">
+                <BiAxialBarChart data={mockBiAxialData} />
+              </div>
+            </div>
+            
+            <div className="card connections-card">
+              <div className="card-header">
+                <h2>Connection Types</h2>
+                <div className="card-subtitle">Total stakeholder connections broken down by attitude type</div>
+              </div>
+              <div className="card-content">
+                <ConnectionsCard data={mockConnectionsData} />
+              </div>
+            </div>
+            
+            <div className="card reachouts-card">
+              <div className="card-header">
+                <h2>Reach Out Methods</h2>
+                <div className="card-subtitle">Total outreach activities broken down by channel</div>
+              </div>
+              <div className="card-content">
+                <ReachOutsCard data={mockReachOutsData} />
+              </div>
+            </div>
+            
+            <div className="card response-card">
+              <div className="card-header">
+                <h2>Response Metrics</h2>
+                <div className="card-subtitle">Stakeholder response rates and engagement metrics</div>
+              </div>
+              <div className="card-content">
+                <ResponseChart />
+              </div>
+            </div>
+            
+            <div className="card growth-card">
+              <div className="card-header">
+                <h2>Growth Trend</h2>
+                <div className="card-subtitle">PG count by KPI stage over time</div>
+              </div>
+              <div className="card-content">
+                <GrowthChart data={mockGrowthData} />
+              </div>
+            </div>
           </div>
-          <button className="clear-selection" onClick={() => setSelectedStage(null)}>Clear Filter</button>
-        </div>
+        </>
       )}
-      
-      <div className="dashboard-grid">
-        <div className="card funnel-card">
-          <div className="card-header">
-            <h2>Acquisition Funnel Stages</h2>
-            <div className="card-subtitle">Click on a stage to filter dashboard data</div>
-          </div>
-          <div className="card-content">
-            <FunnelChart onStageClick={handleStageClick} />
-          </div>
-        </div>
-        
-        <div className="card distribution-card">
-          <div className="card-header">
-            <h2>Vertical Distribution & Patient Counts</h2>
-            <div className="card-subtitle">Relationship between verticals (PG, CHC, VA) and patient counts</div>
-          </div>
-          <div className="card-content">
-            <BiAxialBarChart data={mockBiAxialData} />
-          </div>
-        </div>
-        
-        <div className="card connections-card">
-          <div className="card-header">
-            <h2>Connection Types</h2>
-            <div className="card-subtitle">Total stakeholder connections broken down by attitude type</div>
-          </div>
-          <div className="card-content">
-            <ConnectionsCard data={mockConnectionsData} />
-          </div>
-        </div>
-        
-        <div className="card reachouts-card">
-          <div className="card-header">
-            <h2>Reach Out Methods</h2>
-            <div className="card-subtitle">Total outreach activities broken down by channel</div>
-          </div>
-          <div className="card-content">
-            <ReachOutsCard data={mockReachOutsData} />
-          </div>
-        </div>
-        
-        <div className="card response-card">
-          <div className="card-header">
-            <h2>Response Metrics</h2>
-            <div className="card-subtitle">Stakeholder response rates and engagement metrics</div>
-          </div>
-          <div className="card-content">
-            <ResponseChart />
-          </div>
-        </div>
-        
-        <div className="card growth-card">
-          <div className="card-header">
-            <h2>Growth Trend</h2>
-            <div className="card-subtitle">PG count by KPI stage over time</div>
-          </div>
-          <div className="card-content">
-            <GrowthChart data={mockGrowthData} />
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
