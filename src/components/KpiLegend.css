@@ -1,0 +1,111 @@
+.kpi-legend-container {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.kpi-legend-container.expanded {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.03);
+}
+
+.legend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.kpi-legend-container.expanded .legend-header {
+  border-bottom-color: #e2e8f0;
+}
+
+.legend-header h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.toggle-button:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+.legend-content {
+  padding: 0.75rem 1rem;
+}
+
+.legend-item {
+  margin-bottom: 1rem;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-stage-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.stage-badge {
+  background-color: #f43f5e;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-right: 0.75rem;
+}
+
+.stage-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.stage-criteria {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0 0.5rem;
+}
+
+.stage-criteria li {
+  font-size: 0.8125rem;
+  color: #475569;
+  padding: 0.25rem 0;
+  position: relative;
+  padding-left: 1rem;
+  line-height: 1.4;
+}
+
+.stage-criteria li:before {
+  content: "•";
+  color: #f43f5e;
+  position: absolute;
+  left: 0;
+} 
