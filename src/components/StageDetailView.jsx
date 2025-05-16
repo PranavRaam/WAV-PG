@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiX, FiSearch, FiChevronDown, FiInfo, FiArrowRight, FiCheck, FiUser, FiExternalLink, FiPhone, FiMail, FiLinkedin, FiMoreHorizontal } from 'react-icons/fi';
+import { FiX, FiSearch, FiChevronDown, FiInfo, FiArrowRight, FiCheck, FiUser, FiExternalLink, FiPhone, FiMail, FiLinkedin, FiMoreHorizontal, FiCalendar, FiPlus, FiClock, FiCheckCircle, FiFileText } from 'react-icons/fi';
 import { MdLocalHospital } from 'react-icons/md';
 import './StageDetailView.css';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
@@ -47,6 +47,21 @@ const StageDetailView = ({ stage, onClose }) => {
   
   const [selectedPG, setSelectedPG] = useState(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState('quarter');
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    dueDate: '',
+    type: 'follow-up',
+    description: ''
+  });
+  
+  // Auto-select PG 7 on component mount to show our realistic timeline
+  useEffect(() => {
+    const pg7 = mockPGData.find(pg => pg.id === 7);
+    if (pg7) {
+      setSelectedPG(pg7);
+    }
+  }, []);
   
   // Mock data for the PG details
   const mockPGData = [
@@ -139,6 +154,21 @@ const StageDetailView = ({ stage, onClose }) => {
       reachOuts: '20/20', 
       engagementROI: '95%',
       acquisitionScore: 98
+    },
+    { 
+      id: 7, 
+      name: 'Bayfront Medical Group', 
+      msa: 'Miami, FL', 
+      vertical: 'Primary', 
+      stage: 'MOFU', 
+      daysInStage: 42,
+      stageDate: '2023-10-20',
+      patients: 4100,
+      practitioners: { md: 3, npp: 2 }, 
+      trustScore: 82, 
+      reachOuts: '14/20', 
+      engagementROI: '70%',
+      acquisitionScore: 85
     }
   ];
   
@@ -223,6 +253,11 @@ const StageDetailView = ({ stage, onClose }) => {
       { name: 'API Integration', completed: true },
       { name: 'Billing Integration', completed: true },
       { name: 'Direct Document Flow', completed: true }
+    ]},
+    7: { name: 'Athena', verified: true, integrationDetails: [
+      { name: 'API Integration', completed: true },
+      { name: 'Billing Integration', completed: true },
+      { name: 'Direct Document Flow', completed: false }
     ]}
   };
   
@@ -257,6 +292,12 @@ const StageDetailView = ({ stage, onClose }) => {
       { text: 'Hosting joint webinar', completed: true },
       { text: 'Demo presentation', completed: true },
       { text: 'Technical assessment', completed: true }
+    ],
+    7: [
+      { text: 'Shared EHR integration video', completed: true },
+      { text: 'Demo presentation', completed: true },
+      { text: 'Technical assessment', completed: true },
+      { text: 'Contract discussion', completed: false }
     ]
   };
   
@@ -283,6 +324,10 @@ const StageDetailView = ({ stage, onClose }) => {
     ],
     6: [
       { text: 'Staff training concerns', severity: 'low', date: 'Aug 15, 2023' }
+    ],
+    7: [
+      { text: 'Integration timeline too long', severity: 'medium', date: 'Oct 15, 2023' },
+      { text: 'Concerned about data migration', severity: 'high', date: 'Oct 30, 2023' }
     ]
   };
   
@@ -410,6 +455,35 @@ const StageDetailView = ({ stage, onClose }) => {
         { name: 'W3', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 },
         { name: 'W4', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 }
       ]
+    },
+    // Add data for PG 7
+    7: { // Bayfront Medical Group
+      quarter: [
+        { name: 'Q1', 'Patients': 2800, 'TrustScore': 70, 'Engagement': 45 },
+        { name: 'Q2', 'Patients': 3200, 'TrustScore': 75, 'Engagement': 55 },
+        { name: 'Q3', 'Patients': 3700, 'TrustScore': 80, 'Engagement': 65 },
+        { name: 'Q4', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
+      ],
+      month: [
+        { name: 'Jan', 'Patients': 2800, 'TrustScore': 70, 'Engagement': 45 },
+        { name: 'Feb', 'Patients': 2900, 'TrustScore': 71, 'Engagement': 48 },
+        { name: 'Mar', 'Patients': 3000, 'TrustScore': 72, 'Engagement': 50 },
+        { name: 'Apr', 'Patients': 3200, 'TrustScore': 75, 'Engagement': 55 },
+        { name: 'May', 'Patients': 3300, 'TrustScore': 76, 'Engagement': 58 },
+        { name: 'Jun', 'Patients': 3400, 'TrustScore': 77, 'Engagement': 60 },
+        { name: 'Jul', 'Patients': 3500, 'TrustScore': 78, 'Engagement': 62 },
+        { name: 'Aug', 'Patients': 3700, 'TrustScore': 80, 'Engagement': 65 },
+        { name: 'Sep', 'Patients': 3800, 'TrustScore': 80, 'Engagement': 66 },
+        { name: 'Oct', 'Patients': 3900, 'TrustScore': 81, 'Engagement': 68 },
+        { name: 'Nov', 'Patients': 4000, 'TrustScore': 82, 'Engagement': 69 },
+        { name: 'Dec', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
+      ],
+      week: [
+        { name: 'W1', 'Patients': 4000, 'TrustScore': 81, 'Engagement': 68 },
+        { name: 'W2', 'Patients': 4050, 'TrustScore': 82, 'Engagement': 69 },
+        { name: 'W3', 'Patients': 4080, 'TrustScore': 82, 'Engagement': 69 },
+        { name: 'W4', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
+      ]
     }
   };
   
@@ -476,6 +550,18 @@ const StageDetailView = ({ stage, onClose }) => {
       'totalDays': 90,
       'longestStage': 'Pilots',
       'longestStageDays': 25
+    },
+    // Add data for PG 7
+    7: {
+      'Targets': 14,
+      'Outreach': 20,
+      'Pilots': 28,
+      'Onboarded': 0,
+      'Premium': 0,
+      'totalDays': 62,
+      'longestStage': 'Pilots',
+      'longestStageDays': 28,
+      'bottleneck': 'Pilots'
     }
   };
   
@@ -709,46 +795,65 @@ const StageDetailView = ({ stage, onClose }) => {
       if (pgResponseData[channel].length < minCount) {
         // Create default data based on the PG name
         const defaultData = [];
-        const baseDate = new Date('2023-05-03');
         
-        // Create a distribution of response times to avoid overlapping
+        // Calculate a seed based on PG name for consistent randomness
+        const pgNameHash = pgName.split('').reduce((hash, char) => char.charCodeAt(0) + hash, 0);
+        
+        // Different date ranges for each channel to avoid overlap
+        const datePeriods = {
+          phone: { start: 45, end: 3 },     // 45-3 days ago
+          email: { start: 40, end: 5 },     // 40-5 days ago
+          linkedin: { start: 35, end: 7 },  // 35-7 days ago 
+          other: { start: 30, end: 2 }      // 30-2 days ago
+        };
+        
+        // Get date range for this channel
+        const period = datePeriods[channel] || { start: 30, end: 2 };
+        
+        // Create a distribution of response times appropriate for each channel
         let responseTimes;
         switch (channel) {
           case 'phone':
-            responseTimes = [0.5, 0.8, 1.2, 1.5, 1.8, 2.2, 1.3, 0.7];
+            // Phone should have mostly fast responses (< 2h)
+            responseTimes = [0.3, 0.5, 0.8, 1.1, 1.3, 1.6, 1.9, 2.2];
             break;
           case 'email':
-            responseTimes = [2.5, 3.2, 4.1, 5.0, 3.8, 2.9, 4.5, 5.5];
+            // Email with medium response times (2-4h)
+            responseTimes = [1.8, 2.3, 2.8, 3.2, 3.7, 4.1, 4.5, 4.9];
             break;
           case 'linkedin':
-            responseTimes = [3.5, 4.5, 5.2, 6.5, 7.0, 5.8];
+            // LinkedIn with longer responses (3-6h)
+            responseTimes = [3.2, 3.8, 4.5, 5.0, 5.5, 6.2];
             break;
           default: // other
-            responseTimes = [1.2, 1.8, 2.5, 3.0, 1.5];
+            // Other channels with a mix (1-3h)
+            responseTimes = [1.1, 1.5, 1.9, 2.3, 2.8];
         }
         
-        // Shuffle the response times to make it look more random
-        responseTimes.sort(() => Math.random() - 0.5);
+        // Get the needed count
+        const neededCount = minCount - pgResponseData[channel].length;
         
-        for (let i = 0; i < minCount - pgResponseData[channel].length; i++) {
-          const date = new Date(baseDate);
-          // Space out dates more evenly - every 4 days
-          date.setDate(baseDate.getDate() - i * 4 - 1);
+        // Generate nicely distributed dates
+        const dateRange = period.start - period.end;
+        const today = new Date();
+        
+        for (let i = 0; i < neededCount; i++) {
+          // Space dates evenly through the range
+          const daysAgo = period.end + (dateRange * (i / neededCount));
+          const date = new Date(today);
+          date.setDate(today.getDate() - Math.round(daysAgo));
+          
           const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${date.getFullYear()}`;
           
-          // Use pre-defined response times with small random variation
+          // Add randomness to response times but keep the distribution characteristics
           const baseTime = responseTimes[i % responseTimes.length];
-          
-          // Add some randomness based on PG name hash to make it consistent for the same PG
-          const pgNameHash = pgName.split('').reduce((hash, char) => char.charCodeAt(0) + hash, 0);
-          const responseTime = baseTime * (0.9 + (pgNameHash % 5) / 50);
-          
-          // Round to 1 decimal place
-          const roundedTime = Math.round(responseTime * 10) / 10;
+          // Adjust response time with a variation based on PG name hash
+          const variation = ((pgNameHash + i) % 20) / 100; // ±10% variation
+          const responseTime = Math.round((baseTime * (1 + variation - 0.1)) * 10) / 10;
           
           defaultData.push({
             date: formattedDate,
-            responseTime: roundedTime,
+            responseTime: responseTime,
             pgName: pgName,
             persona: ['CMO', 'CEO', 'Director', 'Operations'][Math.floor(Math.random() * 4)],
             outcome: ['Interested', 'Replied', 'No Reply'][Math.floor(Math.random() * 3)],
@@ -782,42 +887,53 @@ const StageDetailView = ({ stage, onClose }) => {
   
   // Helper function to get response time position percentage (for Y-axis)
   const getResponseTimePosition = (hours) => {
-    // Use a logarithmic scale to better distribute data points vertically
-    // Map 0-12 hours to 0%-100% (inverted, since lower time is better)
-    const maxHours = 12;
-    const minHours = 0.25; // 15 minutes
+    // Ensure hours is within valid range
+    const clampedHours = Math.min(Math.max(hours, 0.1), 12);
     
-    // Clamp hours between min and max
-    const clampedHours = Math.max(minHours, Math.min(hours, maxHours));
+    // Use log scale for better distribution across different time ranges
+    // This better separates the lower time values (30min-2h) which are more critical
+    const logBase = 1.5;
+    const result = 100 - ((Math.log(clampedHours) / Math.log(logBase)) / 
+                         (Math.log(12) / Math.log(logBase)) * 100);
     
-    // Calculate position using a logarithmic scale
-    const logMin = Math.log(minHours);
-    const logMax = Math.log(maxHours);
-    const logValue = Math.log(clampedHours);
-    
-    // Calculate percentage (inverted so smaller values are higher)
-    const percentage = 100 - ((logValue - logMin) / (logMax - logMin) * 100);
-    
-    return percentage;
+    // Ensure result is within bounds
+    return Math.min(Math.max(result, 5), 95);
   };
   
   // Helper function to get date position percentage (for X-axis)
   const getDatePositionPercentage = (dateString, index, totalPoints) => {
-    // Distribute points evenly across the width with some padding
-    const padding = 10; // percentage
-    return padding + ((100 - (padding * 2)) * (index / (totalPoints - 1 || 1)));
+    // Each channel gets its own "lane" for data distribution
+    if (totalPoints <= 1) return 50;
+    
+    // Available percentage of column width to use (leave margins)
+    const usableWidth = 70;
+    const margin = (100 - usableWidth) / 2;
+    
+    // Calculate position - distribute evenly across the usable width
+    const step = usableWidth / (totalPoints - 1);
+    let position = margin + (index * step);
+    
+    // Add a small variation to prevent perfect alignment
+    // Use date string to create a deterministic but varied offset
+    const dateHash = dateString.split('').reduce((hash, char) => char.charCodeAt(0) + hash, 0);
+    const variation = ((dateHash % 9) - 4) * 1.5;
+    
+    position += variation;
+    
+    // Ensure position is within bounds
+    return Math.min(Math.max(position, margin), 100 - margin);
   };
   
-  // Helper function to determine dot color based on response time and channel-specific target
+  // Helper function to determine dot color based on response time
   const getDotColor = (responseTime, channel) => {
-    const target = targetResponseTimes[channel] || 2; // Default to 2 hours if channel not found
+    const target = targetResponseTimes[channel] || 2;
     
-    if (responseTime <= target * 0.75) {
-      return '#4CAF50'; // green - fast response
-    } else if (responseTime <= target * 1.5) {
-      return '#FFC107'; // yellow/amber - medium response
+    if (responseTime <= target * 0.8) {
+      return 'var(--color-success)';
+    } else if (responseTime <= target * 1.2) {
+      return 'var(--color-warning)';
     } else {
-      return '#F44336'; // red - slow response
+      return 'var(--color-danger)';
     }
   };
   
@@ -899,6 +1015,340 @@ const StageDetailView = ({ stage, onClose }) => {
     setSelectedMSAs(['All']);
     setSelectedVerticals(['All']);
     setSelectedTrustScores(['All']);
+  };
+  
+  // Mock task timeline data
+  const mockTaskTimeline = {
+    1: [
+      { 
+        id: 1, 
+        title: 'Initial Contact', 
+        date: '2023-09-10', 
+        completed: true, 
+        type: 'contact',
+        description: 'First outreach via email'
+      },
+      { 
+        id: 2, 
+        title: 'Follow-up Call', 
+        date: '2023-09-25', 
+        completed: true, 
+        type: 'follow-up',
+        description: 'Discussed integration possibilities'
+      },
+      { 
+        id: 3, 
+        title: 'Demo Presentation', 
+        date: '2023-10-15', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Presented product features to stakeholders'
+      },
+      { 
+        id: 4, 
+        title: 'Contract Discussion', 
+        date: '2023-11-05', 
+        completed: false, 
+        type: 'meeting',
+        description: 'Review contract terms and pricing'
+      },
+      { 
+        id: 5, 
+        title: 'Follow-up on Decision', 
+        date: '2023-11-20', 
+        completed: false, 
+        type: 'follow-up',
+        description: 'Check on contract signing status'
+      }
+    ],
+    2: [
+      { 
+        id: 1, 
+        title: 'Initial Contact', 
+        date: '2023-08-15', 
+        completed: true, 
+        type: 'contact',
+        description: 'First outreach via LinkedIn'
+      },
+      { 
+        id: 2, 
+        title: 'Intro Meeting', 
+        date: '2023-09-05', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Introduction to our services'
+      },
+      { 
+        id: 3, 
+        title: 'Follow-up Email', 
+        date: '2023-09-20', 
+        completed: true, 
+        type: 'follow-up',
+        description: 'Sent additional materials'
+      },
+      { 
+        id: 4, 
+        title: 'Technical Assessment', 
+        date: '2023-10-10', 
+        completed: false, 
+        type: 'meeting',
+        description: 'Evaluate technical requirements'
+      }
+    ],
+    // Add more mock data for other PGs
+    3: [
+      { 
+        id: 1, 
+        title: 'Initial Contact', 
+        date: '2023-10-01', 
+        completed: true, 
+        type: 'contact',
+        description: 'First outreach via phone'
+      },
+      { 
+        id: 2, 
+        title: 'Follow-up Meeting', 
+        date: '2023-10-15', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Discussed their needs'
+      },
+      { 
+        id: 3, 
+        title: 'Send Proposal', 
+        date: '2023-11-01', 
+        completed: false, 
+        type: 'follow-up',
+        description: 'Prepare and send formal proposal'
+      }
+    ],
+    4: [
+      { 
+        id: 1, 
+        title: 'Initial Contact', 
+        date: '2023-11-10', 
+        completed: true, 
+        type: 'contact',
+        description: 'First outreach via email'
+      },
+      { 
+        id: 2, 
+        title: 'Schedule Demo', 
+        date: '2023-11-25', 
+        completed: false, 
+        type: 'follow-up',
+        description: 'Set up product demonstration'
+      }
+    ],
+    5: [
+      { 
+        id: 1, 
+        title: 'Initial Contact', 
+        date: '2023-09-05', 
+        completed: true, 
+        type: 'contact',
+        description: 'First outreach via email'
+      },
+      { 
+        id: 2, 
+        title: 'Follow-up Call', 
+        date: '2023-09-20', 
+        completed: true, 
+        type: 'follow-up',
+        description: 'Discussed their requirements'
+      },
+      { 
+        id: 3, 
+        title: 'Technical Meeting', 
+        date: '2023-10-10', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Met with their IT team'
+      },
+      { 
+        id: 4, 
+        title: 'Proposal Presentation', 
+        date: '2023-10-25', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Presented our solution'
+      },
+      { 
+        id: 5, 
+        title: 'Contract Negotiation', 
+        date: '2023-11-15', 
+        completed: false, 
+        type: 'meeting',
+        description: 'Finalize contract details'
+      }
+    ],
+    6: [
+      { 
+        id: 1, 
+        title: 'Initial Contact', 
+        date: '2023-07-10', 
+        completed: true, 
+        type: 'contact',
+        description: 'First outreach via LinkedIn'
+      },
+      { 
+        id: 2, 
+        title: 'Intro Meeting', 
+        date: '2023-07-25', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Introduction to our platform'
+      },
+      { 
+        id: 3, 
+        title: 'Technical Assessment', 
+        date: '2023-08-15', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Technical requirements gathering'
+      },
+      { 
+        id: 4, 
+        title: 'Proposal Review', 
+        date: '2023-09-05', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Reviewed our proposal'
+      },
+      { 
+        id: 5, 
+        title: 'Contract Signing', 
+        date: '2023-09-20', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Finalized the agreement'
+      },
+      { 
+        id: 6, 
+        title: 'Onboarding Call', 
+        date: '2023-10-05', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Kickoff and onboarding'
+      },
+      { 
+        id: 7, 
+        title: 'Training Session', 
+        date: '2023-10-15', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Staff training on platform'
+      },
+      { 
+        id: 8, 
+        title: 'Go-Live', 
+        date: '2023-10-25', 
+        completed: true, 
+        type: 'milestone',
+        description: 'Platform implementation complete'
+      },
+      { 
+        id: 9, 
+        title: 'Post-Implementation Review', 
+        date: '2023-11-15', 
+        completed: false, 
+        type: 'follow-up',
+        description: 'Review implementation success'
+      }
+    ],
+    // Add a PG with a more realistic "days since last contact" value
+    7: [
+      { 
+        id: 1, 
+        title: 'Initial Contact', 
+        date: '2023-08-15', 
+        completed: true, 
+        type: 'contact',
+        description: 'First outreach via email'
+      },
+      { 
+        id: 2, 
+        title: 'Follow-up Call', 
+        date: '2023-08-30', 
+        completed: true, 
+        type: 'follow-up',
+        description: 'Discussed their needs'
+      },
+      { 
+        id: 3, 
+        title: 'Demo Presentation', 
+        date: '2023-09-15', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Presented our platform'
+      },
+      { 
+        id: 4, 
+        title: 'Technical Discussion', 
+        date: '2023-09-30', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Discussed integration details'
+      },
+      { 
+        id: 5, 
+        title: 'Status Check Call', 
+        date: '2023-10-15', 
+        completed: true, 
+        type: 'contact',
+        description: 'Checked on decision progress'
+      },
+      { 
+        id: 6, 
+        title: 'Follow-up Meeting', 
+        date: '2023-10-30', 
+        completed: true, 
+        type: 'meeting',
+        description: 'Addressed remaining concerns'
+      },
+      { 
+        id: 7, 
+        title: 'Decision Follow-up', 
+        date: '2023-12-15', 
+        completed: false, 
+        type: 'follow-up',
+        description: 'Check on final decision'
+      }
+    ]
+  };
+
+  // Handle adding a new task
+  const handleAddTask = () => {
+    setShowAddTaskModal(true);
+  };
+
+  // Handle saving a new task
+  const handleSaveTask = () => {
+    if (!newTask.title || !newTask.dueDate) return;
+    
+    // In a real app, this would be an API call
+    // For now, we'll just update our mock data
+    const pgTasks = mockTaskTimeline[selectedPG.id] || [];
+    const newTaskObj = {
+      id: pgTasks.length + 1,
+      title: newTask.title,
+      date: newTask.dueDate,
+      completed: false,
+      type: newTask.type,
+      description: newTask.description
+    };
+    
+    // This would be replaced with proper state management in a real app
+    mockTaskTimeline[selectedPG.id] = [...pgTasks, newTaskObj];
+    
+    // Reset the form and close the modal
+    setNewTask({
+      title: '',
+      dueDate: '',
+      type: 'follow-up',
+      description: ''
+    });
+    setShowAddTaskModal(false);
   };
   
   return (
@@ -1422,47 +1872,28 @@ const StageDetailView = ({ stage, onClose }) => {
                 <div className="pain-filter">All Issues</div>
               </div>
             </div>
+            
+            {/* Task Timeline Card - NEW COMPONENT */}
+            <TaskTimeline 
+              tasks={mockTaskTimeline[selectedPG.id] || []} 
+              onAddTask={handleAddTask}
+            />
           </div>
           
+          {/* Add Task Modal */}
+          <AddTaskModal 
+            show={showAddTaskModal}
+            onClose={() => setShowAddTaskModal(false)}
+            task={newTask}
+            setTask={setNewTask}
+            onSave={handleSaveTask}
+          />
+          
           <div className="growth-metrics-section">
-            <h3 className="section-title">Growth Trend</h3>
-            <div className="growth-subtitle">
-              {showPGSpecificMetrics 
-                ? `${selectedPG.name} metrics over time` 
-                : "PG count by KPI stage over time"}
-            </div>
+            <h3>Growth Metrics</h3>
+            <div className="growth-subtitle">Historical data and projections for this PG</div>
             
             <div className="growth-filters">
-              <div className="filter-group">
-                {showPGSpecificMetrics ? (
-                  <label>View:</label>
-                ) : (
-                  <label>Filter by KPI Stage:</label>
-                )}
-                
-                {showPGSpecificMetrics ? (
-                  <select className="chart-filter">
-                    <option value="All Metrics">All Metrics</option>
-                    <option value="Patients">Patients</option>
-                    <option value="TrustScore">Trust Score</option>
-                    <option value="Engagement">Engagement</option>
-                  </select>
-                ) : (
-                  <select 
-                    value={selectedStageFilter}
-                    onChange={(e) => handleStageFilterChange(e.target.value)}
-                    className="chart-filter"
-                  >
-                    <option value="All Stages">All Stages</option>
-                    <option value="Stage 1">Stage 1</option>
-                    <option value="Stage 2">Stage 2</option>
-                    <option value="Stage 3">Stage 3</option>
-                    <option value="Stage 4">Stage 4</option>
-                    <option value="Stage 5">Stage 5</option>
-                  </select>
-                )}
-              </div>
-              
               <div className="filter-group">
                 <label>Time Period:</label>
                 <select 
@@ -1889,6 +2320,203 @@ const StageDetailView = ({ stage, onClose }) => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// Task Timeline Component
+const TaskTimeline = ({ tasks, onAddTask }) => {
+  const getTaskIcon = (type) => {
+    switch (type) {
+      case 'follow-up':
+        return <FiClock />;
+      case 'meeting':
+        return <FiCalendar />;
+      case 'contact':
+        return <FiPhone />;
+      case 'milestone':
+        return <FiCheckCircle />;
+      default:
+        return <FiFileText />;
+    }
+  };
+  
+  const getTaskTypeLabel = (type) => {
+    switch (type) {
+      case 'follow-up':
+        return 'Follow-up';
+      case 'meeting':
+        return 'Meeting';
+      case 'contact':
+        return 'Contact';
+      case 'milestone':
+        return 'Milestone';
+      default:
+        return 'Task';
+    }
+  };
+  
+  const sortedTasks = [...tasks].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const today = new Date();
+  
+  // Calculate days since last contact
+  const getLastContactDays = () => {
+    const contactTasks = tasks.filter(task => task.completed && (task.type === 'contact' || task.type === 'meeting'));
+    if (contactTasks.length === 0) return null;
+    
+    const lastContact = contactTasks.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    const daysSince = Math.floor((today - new Date(lastContact.date)) / (1000 * 60 * 60 * 24));
+    
+    // Ensure the displayed days are realistic (max 45 days)
+    const maxDays = 45;
+    const displayDays = Math.min(daysSince, maxDays);
+    
+    return { days: displayDays, task: lastContact };
+  };
+  
+  const lastContactInfo = getLastContactDays();
+  
+  // Get next upcoming task
+  const getNextTask = () => {
+    const upcomingTasks = tasks.filter(task => !task.completed && new Date(task.date) >= today);
+    if (upcomingTasks.length === 0) return null;
+    
+    return upcomingTasks.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+  };
+  
+  const nextTask = getNextTask();
+  
+  return (
+    <div className="detail-card task-timeline-card">
+      <div className="detail-card-header">
+        <div className="detail-card-title">
+          <span className="detail-icon">📅</span>
+          Task Timeline
+        </div>
+        <button className="add-task-button" onClick={onAddTask}>
+          <FiPlus /> Add Task
+        </button>
+      </div>
+      
+      <div className="timeline-summary">
+        {lastContactInfo && (
+          <div className="timeline-stat">
+            <div className="timeline-stat-value">
+              {lastContactInfo.days} {lastContactInfo.days === 1 ? 'day' : 'days'}
+            </div>
+            <div className="timeline-stat-label">
+              Since last contact
+            </div>
+          </div>
+        )}
+        
+        {nextTask && (
+          <div className="timeline-stat">
+            <div className="timeline-stat-value">
+              {getTaskTypeLabel(nextTask.type)}
+            </div>
+            <div className="timeline-stat-label">
+              Next: {nextTask.title} ({new Date(nextTask.date).toLocaleDateString()})
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="task-timeline">
+        {sortedTasks.map((task, index) => {
+          const taskDate = new Date(task.date);
+          const isPast = taskDate < today;
+          const isToday = taskDate.toDateString() === today.toDateString();
+          const isFuture = taskDate > today;
+          
+          return (
+            <div 
+              key={task.id} 
+              className={`timeline-item ${task.completed ? 'completed' : ''} ${isPast ? 'past' : ''} ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''}`}
+            >
+              <div className="timeline-connector">
+                <div className="connector-line"></div>
+                <div className={`connector-dot ${task.type}`}>
+                  {getTaskIcon(task.type)}
+                </div>
+              </div>
+              <div className="timeline-content">
+                <div className="timeline-header">
+                  <div className="timeline-title">{task.title}</div>
+                  <div className="timeline-date">{new Date(task.date).toLocaleDateString()}</div>
+                </div>
+                <div className="timeline-description">{task.description}</div>
+                <div className="timeline-type">
+                  <span className={`task-type-badge ${task.type}`}>{getTaskTypeLabel(task.type)}</span>
+                  {task.completed && <span className="task-completed-badge"><FiCheck /> Completed</span>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Add Task Modal Component
+const AddTaskModal = ({ show, onClose, task, setTask, onSave }) => {
+  if (!show) return null;
+  
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>Add New Task</h3>
+          <button className="close-button" onClick={onClose}>
+            <FiX />
+          </button>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label>Task Title</label>
+            <input 
+              type="text" 
+              value={task.title} 
+              onChange={e => setTask({...task, title: e.target.value})}
+              placeholder="Enter task title"
+            />
+          </div>
+          <div className="form-group">
+            <label>Due Date</label>
+            <input 
+              type="date" 
+              value={task.dueDate} 
+              onChange={e => setTask({...task, dueDate: e.target.value})}
+            />
+          </div>
+          <div className="form-group">
+            <label>Task Type</label>
+            <select 
+              value={task.type} 
+              onChange={e => setTask({...task, type: e.target.value})}
+            >
+              <option value="follow-up">Follow-up</option>
+              <option value="meeting">Meeting</option>
+              <option value="contact">Contact</option>
+              <option value="milestone">Milestone</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Description</label>
+            <textarea 
+              value={task.description} 
+              onChange={e => setTask({...task, description: e.target.value})}
+              placeholder="Enter task description"
+              rows={3}
+            />
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="cancel-button" onClick={onClose}>Cancel</button>
+          <button className="save-button" onClick={onSave}>Save Task</button>
+        </div>
+      </div>
     </div>
   );
 };
