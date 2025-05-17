@@ -211,6 +211,104 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* Search container styling */
+.search-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0 0.75rem;
+  flex: 1;
+  max-width: 500px;
+  position: relative;
+}
+
+.search-icon {
+  color: #64748b;
+  margin-right: 0.5rem;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  padding: 0.625rem 0;
+  width: 100%;
+  font-size: 0.875rem;
+  color: #334155;
+  font-family: inherit;
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+.clear-search-button {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.clear-search-button:hover {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+/* Search indicator styling */
+.search-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.search-info {
+  color: #1e40af;
+  font-size: 0.875rem;
+}
+
+.clear-search {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-search:hover {
+  background-color: #bfdbfe;
+}
+
 .filter-section {
   display: flex;
   gap: 0.75rem;
@@ -435,6 +533,17 @@
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
+  }
+  
+  .search-container {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .search-wrapper {
+    width: 100%;
+    max-width: none;
   }
   
   .action-section {

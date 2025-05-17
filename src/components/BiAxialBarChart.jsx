@@ -8,6 +8,16 @@ const BiAxialBarChart = ({ data }) => {
     return totalCount > 0 ? (vertical.count / totalCount) * 100 : 0;
   };
 
+  if (!data || data.length === 0) {
+    return (
+      <div className="biaxial-chart-container">
+        <div className="no-data-message">
+          No matching data found for the current search
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="biaxial-chart-container">
       <div className="chart-info">
@@ -39,7 +49,7 @@ const BiAxialBarChart = ({ data }) => {
                     <div 
                       className="vertical-block" 
                       key={vIndex} 
-                      title={`${vertical.type} facility`}
+                      title={`${vertical.type} facility in ${vertical.division}, ${vertical.statisticalArea}`}
                       style={{ width: `${getBlockWidthPercentage(item.verticals, vertical)}%` }}
                     >
                       {vertical.type}: {vertical.count}
@@ -58,13 +68,7 @@ const BiAxialBarChart = ({ data }) => {
         ))}
       </div>
       
-      <div className="chart-axis">
-        <div className="tick" style={{ left: '0%' }}>-400</div>
-        <div className="tick" style={{ left: '25%' }}>-200</div>
-        <div className="tick" style={{ left: '50%' }}>0</div>
-        <div className="tick" style={{ left: '75%' }}>200</div>
-        <div className="tick" style={{ left: '100%' }}>400</div>
-      </div>
+      {/* Removed chart-axis div to hide scale values */}
     </div>
   );
 };

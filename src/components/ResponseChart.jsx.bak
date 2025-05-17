@@ -81,54 +81,6 @@ const ResponseChart = ({ searchQuery = '' }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
   const [viewMode, setViewMode] = useState('pie'); // 'pie' or 'scatter'
-  
-  // State for controlling dropdown visibility
-  const [showTimeRangeDropdown, setShowTimeRangeDropdown] = useState(false);
-  const [showOutcomeDropdown, setShowOutcomeDropdown] = useState(false);
-  const [showRegionDropdown, setShowRegionDropdown] = useState(false);
-
-  // Function to close all dropdowns
-  const closeAllDropdowns = () => {
-    setShowTimeRangeDropdown(false);
-    setShowOutcomeDropdown(false);
-    setShowRegionDropdown(false);
-    setShowDatePicker(false);
-  };
-
-  // Toggle dropdown visibility
-  const toggleDropdown = (dropdownName) => {
-    closeAllDropdowns(); // Close all other dropdowns first
-    
-    // Open the clicked dropdown
-    switch (dropdownName) {
-      case 'timeRange':
-        setShowTimeRangeDropdown(!showTimeRangeDropdown);
-        break;
-      case 'outcome':
-        setShowOutcomeDropdown(!showOutcomeDropdown);
-        break;
-      case 'region':
-        setShowRegionDropdown(!showRegionDropdown);
-        break;
-      default:
-        break;
-    }
-  };
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const isOutsideClick = !event.target.closest('.filter-dropdown');
-      if (isOutsideClick) {
-        closeAllDropdowns();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   // Apply filters to data
   useEffect(() => {
@@ -534,10 +486,15 @@ const ResponseChart = ({ searchQuery = '' }) => {
   
   // Function to reset all filters
   const resetFilters = () => {
+    setIsLoading(true);
     setTimeRange('7d');
     setSelectedOutcome('all');
     setSelectedRegion('all');
-    setDateRange(getDateRange('7d'));
+    setCustomStartDate('2025-05-01');
+    setCustomEndDate('2025-05-03');
+    
+    // Small delay to show loading state
+    setTimeout(() => setIsLoading(false), 300);
   };
 
   // Handle custom date range
@@ -615,164 +572,134 @@ const ResponseChart = ({ searchQuery = '' }) => {
     return [0, 30, 60, 120, 180, 240];
   };
 
-  // Handle selection of a dropdown item
-  const handleSelectItem = (dropdownName, value) => {
-    switch (dropdownName) {
-      case 'timeRange':
-        setTimeRange(value);
-        if (value === 'custom') {
-          setShowDatePicker(true);
-        } else {
-          closeAllDropdowns();
-        }
-        break;
-      case 'outcome':
-        setSelectedOutcome(value);
-        closeAllDropdowns();
-        break;
-      case 'region':
-        setSelectedRegion(value);
-        closeAllDropdowns();
-        break;
-      default:
-        break;
-    }
-  };
-
   return (
-    <div className={`response-chart-container ${isLoading ? 'loading' : ''}`}>
+    <div className="response-chart-container">
       <div className="chart-header">
-        <div className="view-toggle">
-          <button 
-            className={`view-mode-btn ${viewMode === 'pie' ? 'active' : ''}`}
-            onClick={() => setViewMode('pie')}
-            title="Pie Chart View"
-          >
-            <FiPieChart size={18} />
-          </button>
-          <button 
-            className={`view-mode-btn ${viewMode === 'scatter' ? 'active' : ''}`}
-            onClick={() => setViewMode('scatter')}
-            title="Response Time Plot"
-          >
-            <FiBarChart2 size={18} />
-          </button>
+        <div className="header-left">
+          <h3>Response Performance by Channel</h3>
+          {activeFilters > 0 && (
+            <div className="active-filters-badge">
+              {activeFilters} {activeFilters === 1 ? 'filter' : 'filters'} active
+            </div>
+          )}
         </div>
-        
-        <h2 className="chart-title">Response Performance</h2>
-        
-        <div className="filter-actions">
+        <div className="chart-actions">
           <button 
-            className={`filter-button ${showFilters ? 'active' : ''} ${activeFilters > 0 ? 'has-filters' : ''}`} 
-            onClick={() => setShowFilters(!showFilters)}
-            title="Show Filters"
+            className="view-toggle-button" 
+            onClick={toggleViewMode}
+            title={viewMode === 'pie' ? 'Switch to Scatter Plot' : 'Switch to Pie Charts'}
           >
-            <FiFilter size={18} />
-            {activeFilters > 0 && <span className="filter-count">{activeFilters}</span>}
+            {viewMode === 'pie' ? <FiBarChart2 /> : <FiPieChart />}
+            {viewMode === 'pie' ? ' Show Plot View' : ' Show Pie View'}
+          </button>
+          <button 
+            className={`filter-button ${showFilters ? 'active' : ''}`} 
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FiFilter /> Filters {activeFilters > 0 && <span className="filter-count">{activeFilters}</span>}
           </button>
         </div>
       </div>
       
       {showFilters && (
         <div className="filter-panel">
-          <div className="filter-grid">
+          <div className="filter-groups">
             <div className="filter-group">
               <label>Time Range</label>
               <div className="filter-dropdown">
                 <button 
                   className="dropdown-trigger"
-                  onClick={() => toggleDropdown('timeRange')}
+                  onClick={() => setShowDatePicker(!showDatePicker)}
                 >
-                  {timeRangeOptions.find(o => o.value === timeRange)?.label || 'Select Time Range'}
-                  <FiChevronDown size={16} />
+                  {timeRangeOptions.find(o => o.value === timeRange)?.label || 'Select Range'}
+                  <FiChevronDown />
                 </button>
-                {showTimeRangeDropdown && (
+                {!showDatePicker ? (
                   <div className="dropdown-menu">
                     {timeRangeOptions.map(option => (
                       <div 
                         key={option.value} 
                         className={`dropdown-item ${timeRange === option.value ? 'selected' : ''}`}
-                        onClick={() => handleSelectItem('timeRange', option.value)}
+                        onClick={() => {
+                          setTimeRange(option.value);
+                          if (option.value === 'custom') {
+                            setShowDatePicker(true);
+                          }
+                        }}
                       >
                         {option.label}
                       </div>
                     ))}
                   </div>
-                )}
-                
-                {timeRange === 'custom' && showDatePicker && (
-                  <div className="date-picker-container">
-                    <div className="date-input-group">
-                      <label>Start:</label>
+                ) : (
+                  <div className="date-picker">
+                    <div className="date-inputs">
+                      <div className="date-input-group">
+                        <label>Start Date</label>
                       <input 
                         type="date" 
                         value={customStartDate}
-                        onChange={e => setCustomStartDate(e.target.value)}
+                        max={customEndDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
                       />
                     </div>
-                    <div className="date-input-group">
-                      <label>End:</label>
+                      <div className="date-input-group">
+                        <label>End Date</label>
                       <input 
                         type="date" 
                         value={customEndDate}
-                        onChange={e => setCustomEndDate(e.target.value)}
+                        min={customStartDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
                       />
                     </div>
-                    <button onClick={() => setShowDatePicker(false)}>Apply</button>
+                    </div>
+                    <div className="date-actions">
+                      <button onClick={handleCustomDateChange}>Apply</button>
+                      <button onClick={() => setShowDatePicker(false)}>Cancel</button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
             
             <div className="filter-group">
               <label>Outcome</label>
               <div className="filter-dropdown">
-                <button 
-                  className="dropdown-trigger"
-                  onClick={() => toggleDropdown('outcome')}
-                >
+                <button className="dropdown-trigger">
                   {outcomeOptions.find(o => o.value === selectedOutcome)?.label || 'Select Outcome'}
-                  <FiChevronDown size={16} />
+                  <FiChevronDown />
                 </button>
-                {showOutcomeDropdown && (
-                  <div className="dropdown-menu">
-                    {outcomeOptions.map(option => (
-                      <div 
-                        key={option.value} 
-                        className={`dropdown-item ${selectedOutcome === option.value ? 'selected' : ''}`}
-                        onClick={() => handleSelectItem('outcome', option.value)}
-                      >
-                        {option.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="dropdown-menu">
+                {outcomeOptions.map(option => (
+                    <div 
+                      key={option.value} 
+                      className={`dropdown-item ${selectedOutcome === option.value ? 'selected' : ''}`}
+                      onClick={() => setSelectedOutcome(option.value)}
+                    >
+                      {option.label}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             
             <div className="filter-group">
               <label>Region</label>
               <div className="filter-dropdown">
-                <button 
-                  className="dropdown-trigger"
-                  onClick={() => toggleDropdown('region')}
-                >
+                <button className="dropdown-trigger">
                   {regionOptions.find(o => o.value === selectedRegion)?.label || 'Select Region'}
-                  <FiChevronDown size={16} />
+                  <FiChevronDown />
                 </button>
-                {showRegionDropdown && (
-                  <div className="dropdown-menu">
-                    {regionOptions.map(option => (
-                      <div 
-                        key={option.value} 
-                        className={`dropdown-item ${selectedRegion === option.value ? 'selected' : ''}`}
-                        onClick={() => handleSelectItem('region', option.value)}
-                      >
-                        {option.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="dropdown-menu">
+                {regionOptions.map(option => (
+                    <div 
+                      key={option.value} 
+                      className={`dropdown-item ${selectedRegion === option.value ? 'selected' : ''}`}
+                      onClick={() => setSelectedRegion(option.value)}
+                    >
+                      {option.label}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -784,30 +711,31 @@ const ResponseChart = ({ searchQuery = '' }) => {
                   <span>Active Filters:</span>
                   {timeRange !== '7d' && (
                     <span className="filter-tag">
-                      {timeRange === 'custom' ? 'Custom Date Range' : timeRangeOptions.find(o => o.value === timeRange)?.label}
-                      <FiX size={16} onClick={() => setTimeRange('7d')} />
+                      {timeRangeOptions.find(o => o.value === timeRange)?.label}
+                      <FiX onClick={() => setTimeRange('7d')} />
                     </span>
                   )}
                   {selectedOutcome !== 'all' && (
                     <span className="filter-tag">
                       {selectedOutcome}
-                      <FiX size={16} onClick={() => setSelectedOutcome('all')} />
+                      <FiX onClick={() => setSelectedOutcome('all')} />
                     </span>
                   )}
                   {selectedRegion !== 'all' && (
                     <span className="filter-tag">
                       {regionOptions.find(o => o.value === selectedRegion)?.label}
-                      <FiX size={16} onClick={() => setSelectedRegion('all')} />
+                      <FiX onClick={() => setSelectedRegion('all')} />
+                    </span>
+                  )}
+                  {searchQuery.trim() !== '' && (
+                    <span className="filter-tag">
+                      Search: "{searchQuery}"
                     </span>
                   )}
                 </div>
               )}
             </div>
-            
-            <button className="reset-filters" onClick={resetFilters}>
-              <FiRefreshCw size={16} />
-              Reset Filters
-            </button>
+            <button className="reset-button" onClick={resetFilters}>Reset Filters</button>
           </div>
         </div>
       )}
@@ -820,7 +748,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
         <div className="legend-item">
           <div className="legend-box average"></div>
           <span>Average Response Time (Up to 50% Above Target)</span>
-        </div>
+          </div>
         <div className="legend-item">
           <div className="legend-box poor"></div>
           <span>Poor Response Time (More than 50% Above Target)</span>
@@ -829,15 +757,15 @@ const ResponseChart = ({ searchQuery = '' }) => {
           <div className="legend-item">
             <div className="legend-line target"></div>
             <span>Target Response Time</span>
-          </div>
+            </div>
         )}
-      </div>
-
+                </div>
+                
       {isLoading ? (
         <div className="loading-overlay">
-          <FiRefreshCw className="loading-icon" size={24} />
+          <FiRefreshCw className="loading-icon" />
           <div>Updating charts...</div>
-        </div>
+                </div>
       ) : viewMode === 'pie' ? (
         // Pie Chart View
         <div className="pie-charts-grid">
@@ -846,11 +774,11 @@ const ResponseChart = ({ searchQuery = '' }) => {
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.phone}
-              </div>
+                </div>
               <h4>Phone</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.phone)}</div>
               <div className="data-count">{filteredData.phone.length} data points</div>
-            </div>
+              </div>
             <div className="pie-chart">
               <ResponsiveContainer width="100%" height={200}>
                 {hasNoData(pieChartData.phone) ? (
@@ -875,19 +803,19 @@ const ResponseChart = ({ searchQuery = '' }) => {
                   </PieChart>
                 )}
               </ResponsiveContainer>
-            </div>
-          </div>
-          
+                </div>
+                </div>
+                
           {/* Email Chart */}
           <div className="pie-chart-container">
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.email}
-              </div>
+                </div>
               <h4>Email</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.email)}</div>
               <div className="data-count">{filteredData.email.length} data points</div>
-            </div>
+              </div>
             <div className="pie-chart">
               <ResponsiveContainer width="100%" height={200}>
                 {hasNoData(pieChartData.email) ? (
@@ -912,19 +840,19 @@ const ResponseChart = ({ searchQuery = '' }) => {
                   </PieChart>
                 )}
               </ResponsiveContainer>
-            </div>
-          </div>
-          
+                </div>
+                </div>
+                
           {/* LinkedIn Chart */}
           <div className="pie-chart-container">
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.linkedin}
-              </div>
+                </div>
               <h4>LinkedIn</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.linkedin)}</div>
               <div className="data-count">{filteredData.linkedin.length} data points</div>
-            </div>
+              </div>
             <div className="pie-chart">
               <ResponsiveContainer width="100%" height={200}>
                 {hasNoData(pieChartData.linkedin) ? (
@@ -949,19 +877,19 @@ const ResponseChart = ({ searchQuery = '' }) => {
                   </PieChart>
                 )}
               </ResponsiveContainer>
-            </div>
-          </div>
-          
+                </div>
+                </div>
+                
           {/* Others Chart */}
           <div className="pie-chart-container">
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.other}
-              </div>
+                </div>
               <h4>Others</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.other)}</div>
               <div className="data-count">{filteredData.other.length} data points</div>
-            </div>
+              </div>
             <div className="pie-chart">
               <ResponsiveContainer width="100%" height={200}>
                 {hasNoData(pieChartData.other) ? (
@@ -986,7 +914,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
                   </PieChart>
                 )}
               </ResponsiveContainer>
-            </div>
+        </div>
           </div>
         </div>
       ) : (
@@ -996,32 +924,32 @@ const ResponseChart = ({ searchQuery = '' }) => {
             <div className="channel-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.phone}
-              </div>
+      </div>
               <div className="channel-label">Phone</div>
               <div className="channel-count">{filteredData.phone.length}</div>
-            </div>
+              </div>
             <div className="channel-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.email}
-              </div>
+            </div>
               <div className="channel-label">Email</div>
               <div className="channel-count">{filteredData.email.length}</div>
-            </div>
+              </div>
             <div className="channel-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.linkedin}
-              </div>
+            </div>
               <div className="channel-label">LinkedIn</div>
               <div className="channel-count">{filteredData.linkedin.length}</div>
-            </div>
+              </div>
             <div className="channel-header">
               <div className="channel-icon-wrapper">
                 {channelIcons.other}
-              </div>
+            </div>
               <div className="channel-label">Others</div>
               <div className="channel-count">{filteredData.other.length}</div>
+              </div>
             </div>
-          </div>
           <ResponsiveContainer width="100%" height={450}>
             <ScatterChart
               margin={{ top: 20, right: 20, bottom: 30, left: 20 }}
@@ -1132,7 +1060,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
               </Scatter>
             </ScatterChart>
           </ResponsiveContainer>
-        </div>
+          </div>
       )}
 
       <div className="channel-metrics">
@@ -1142,10 +1070,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
             className={`channel-card ${channel.performance}`}
           >
             <div className="channel-icon-container">
-              {channel.channel === 'phone' && <FiPhone size={24} />}
-              {channel.channel === 'email' && <FiMail size={24} />}
-              {channel.channel === 'linkedin' && <FiLinkedin size={24} />}
-              {channel.channel === 'other' && <FiMoreHorizontal size={24} />}
+              {channelIcons[channel.channel]}
             </div>
             <div className="channel-name">{channel.name}</div>
             <div className="channel-value">{formatResponseTime(channel.avg)}</div>

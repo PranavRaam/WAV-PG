@@ -158,6 +158,22 @@
   border-bottom: 2px solid #3b82f6;
 }
 
+/* Active tab styles for connection types */
+.tab.active.promoter {
+  color: #22c55e;
+  border-bottom: 2px solid #22c55e;
+}
+
+.tab.active.neutral {
+  color: #f59e0b;
+  border-bottom: 2px solid #f59e0b;
+}
+
+.tab.active.blockers {
+  color: #ef4444;
+  border-bottom: 2px solid #ef4444;
+}
+
 /* Connection card specific styles */
 .promoter {
   color: #22c55e;
@@ -228,4 +244,27 @@
   color: #64748b;
   margin: -0.3125rem 0 0.75rem;
   line-height: 1.4;
+}
+
+/* Success Rate Container */
+.success-rate-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #f5f7fa;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.success-rate-label {
+  font-weight: 500;
+  color: #5a5f6d;
+  margin-right: 8px;
+}
+
+.success-rate-value {
+  font-weight: 600;
+  color: #4364e8;
 } 

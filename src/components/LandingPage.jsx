@@ -10,10 +10,11 @@ const ResponseVelocityPreview = () => {
   const targetLineColor = 'var(--color-danger, #f87171)';
   const averageLineColor = '#94A3B8';
   
+  // Optimize for more compact layout
   return (
-    <div className="response-velocity-chart">
+    <div className="response-velocity-chart response-velocity-horizontal">
       <div className="chart-header">
-        <h4>Response Velocity by Channel</h4>
+        <h4>Customer Success by Channel</h4>
       </div>
       <div className="chart-content">
         <div className="chart-channels">
@@ -27,10 +28,10 @@ const ResponseVelocityPreview = () => {
             </div>
             <div className="channel-chart">
               <div className="target-line" style={{ top: '46%', backgroundColor: targetLineColor }}>
-                <span className="target-label">Target (1.5h)</span>
+                <span className="target-label">1.5h</span>
               </div>
               <div className="average-line" style={{ top: '30%', backgroundColor: averageLineColor }}>
-                <span className="average-label">Avg (1.2h)</span>
+                <span className="average-label">1.2h</span>
               </div>
               <div className="data-points">
                 <span className="data-point success" style={{ top: '20%', left: '10%' }}></span>
@@ -52,10 +53,10 @@ const ResponseVelocityPreview = () => {
             </div>
             <div className="channel-chart">
               <div className="target-line" style={{ top: '46%', backgroundColor: targetLineColor }}>
-                <span className="target-label">Target (4h)</span>
+                <span className="target-label">4h</span>
               </div>
               <div className="average-line" style={{ top: '65%', backgroundColor: averageLineColor }}>
-                <span className="average-label">Avg (6.3h)</span>
+                <span className="average-label">6.3h</span>
               </div>
               <div className="data-points">
                 <span className="data-point warning" style={{ top: '50%', left: '15%' }}></span>
@@ -77,10 +78,10 @@ const ResponseVelocityPreview = () => {
             </div>
             <div className="channel-chart">
               <div className="target-line" style={{ top: '46%', backgroundColor: targetLineColor }}>
-                <span className="target-label">Target (3h)</span>
+                <span className="target-label">3h</span>
               </div>
               <div className="average-line" style={{ top: '50%', backgroundColor: averageLineColor }}>
-                <span className="average-label">Avg (3.5h)</span>
+                <span className="average-label">3.5h</span>
               </div>
               <div className="data-points">
                 <span className="data-point primary" style={{ top: '40%', left: '20%' }}></span>
@@ -101,10 +102,10 @@ const ResponseVelocityPreview = () => {
             </div>
             <div className="channel-chart">
               <div className="target-line" style={{ top: '46%', backgroundColor: targetLineColor }}>
-                <span className="target-label">Target (6h)</span>
+                <span className="target-label">6h</span>
               </div>
               <div className="average-line" style={{ top: '70%', backgroundColor: averageLineColor }}>
-                <span className="average-label">Avg (8.2h)</span>
+                <span className="average-label">8.2h</span>
               </div>
               <div className="data-points">
                 <span className="data-point danger" style={{ top: '60%', left: '25%' }}></span>
@@ -116,14 +117,14 @@ const ResponseVelocityPreview = () => {
           </div>
         </div>
         
-        <div className="chart-legend">
+        <div className="chart-legend compact">
           <div className="legend-item">
             <span className="legend-color" style={{ backgroundColor: targetLineColor }}></span>
-            <span className="legend-text">Target Response Time</span>
+            <span className="legend-text">Target</span>
           </div>
           <div className="legend-item">
             <span className="legend-color" style={{ backgroundColor: averageLineColor }}></span>
-            <span className="legend-text">Average Response Time</span>
+            <span className="legend-text">Average</span>
           </div>
         </div>
       </div>
@@ -140,42 +141,27 @@ const WAVFunnelPreview = () => {
     {
       stage: "Targets",
       pgCount: 45,
-      verticalMix: { CHC: 22, Primary: 15, Geriatrics: 8 },
-      conversionRate: 75,
-      avgDaysInStage: 12,
-      trustScore: 65
+      verticalMix: { CHC: 22, Primary: 15 }
     },
     {
       stage: "Outreach",
       pgCount: 34,
-      verticalMix: { CHC: 18, Primary: 12, Geriatrics: 4 },
-      conversionRate: 62,
-      avgDaysInStage: 21,
-      trustScore: 72
+      verticalMix: { CHC: 18, Primary: 12 }
     },
     {
       stage: "Pilots",
       pgCount: 21,
-      verticalMix: { CHC: 14, Primary: 6, Geriatrics: 1 },
-      conversionRate: 90,
-      avgDaysInStage: 30,
-      trustScore: 84
+      verticalMix: { CHC: 14, Primary: 6 }
     },
     {
       stage: "Onboarded",
       pgCount: 19,
-      verticalMix: { CHC: 12, Primary: 7, Geriatrics: 0 },
-      conversionRate: 42,
-      avgDaysInStage: 45,
-      trustScore: 88
+      verticalMix: { CHC: 12, Primary: 7 }
     },
     {
       stage: "Premium",
       pgCount: 8,
-      verticalMix: { CHC: 5, Primary: 3, Geriatrics: 0 },
-      conversionRate: 0,
-      avgDaysInStage: 90,
-      trustScore: 95
+      verticalMix: { CHC: 5, Primary: 3 }
     }
   ];
   
@@ -218,26 +204,6 @@ const WAVFunnelPreview = () => {
                   <span className="vertical-label">Primary:</span>
                   <span className="vertical-value">{funnelData[hoveredStage].verticalMix.Primary}</span>
                 </div>
-                {funnelData[hoveredStage].verticalMix.Geriatrics > 0 && (
-                  <div className="vertical-item">
-                    <span className="vertical-label">Geriatrics:</span>
-                    <span className="vertical-value">{funnelData[hoveredStage].verticalMix.Geriatrics}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="hover-metrics">
-              <div className="hover-metric">
-                <span className="metric-value">{funnelData[hoveredStage].conversionRate}%</span>
-                <span className="metric-label">Conversion</span>
-              </div>
-              <div className="hover-metric">
-                <span className="metric-value">{funnelData[hoveredStage].avgDaysInStage}</span>
-                <span className="metric-label">Avg Days</span>
-              </div>
-              <div className="hover-metric">
-                <span className="metric-value">{funnelData[hoveredStage].trustScore}</span>
-                <span className="metric-label">Trust Score</span>
               </div>
             </div>
           </div>
@@ -488,56 +454,212 @@ const AcquisitionGraph = () => {
 const LandingPage = ({ onNavigate }) => {
   return (
     <div className="landing-container">
+      {/* Enhanced Goals Section */}
       <div className="goals-section">
         <div className="goal-card">
-          <h3><FiTarget /> Acquisition Target</h3>
-          <div className="goal-progress">65%</div>
-          <div className="goal-description">75 of 115 acquired</div>
+          <div className="goal-card-inner">
+            <div className="goal-icon">
+              <FiTarget />
+            </div>
+            <div className="goal-content">
+              <h3>Goal 1</h3>
+              <div className="goal-progress-wrapper">
+                <div className="goal-progress">65%</div>
+                <div className="goal-progress-bar">
+                  <div className="goal-progress-fill" style={{ width: '65%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="goal-card">
-          <h3><FiTrendingUp /> Growth Rate</h3>
-          <div className="goal-progress">12%</div>
-          <div className="goal-description">Monthly increase</div>
+          <div className="goal-card-inner">
+            <div className="goal-icon">
+              <FiTrendingUp />
+            </div>
+            <div className="goal-content">
+              <h3>Goal 2</h3>
+              <div className="goal-progress-wrapper">
+                <div className="goal-progress">12%</div>
+                <div className="goal-progress-bar">
+                  <div className="goal-progress-fill" style={{ width: '12%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="goal-card">
-          <h3><FiCheckCircle /> Trust Score</h3>
-          <div className="goal-progress">82</div>
-          <div className="goal-description">+5 points since last month</div>
+          <div className="goal-card-inner">
+            <div className="goal-icon">
+              <FiCheckCircle />
+            </div>
+            <div className="goal-content">
+              <h3>Goal 3</h3>
+              <div className="goal-progress-wrapper">
+                <div className="goal-progress">82</div>
+                <div className="goal-progress-bar">
+                  <div className="goal-progress-fill" style={{ width: '82%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
+      {/* Enhanced USA Statistical Areas */}
       <div className="search-section">
-        <h3>Search PG Database</h3>
+        <div className="section-header">
+          <h3>USA Statistical Areas</h3>
+          <div className="section-actions">
+            <button className="action-button"><FiFilter /></button>
+          </div>
+        </div>
+        
         <div className="search-box">
           <FiSearch className="search-icon" />
-          <input type="text" placeholder="Search by name, location, or specialty..." />
+          <input type="text" placeholder="Search by region or state..." />
         </div>
-        <div className="search-filters">
-          <div className="filter-badge active">
-            <FiLayers /> All PGs
-          </div>
-          <div className="filter-badge">
-            <FiTarget /> Targets
-          </div>
-          <div className="filter-badge">
-            <FiActivity /> Active
-          </div>
+        
+        <div className="section-tabs">
+          <div className="section-tab active">All Regions</div>
+          <div className="section-tab">Metropolitan</div>
+          <div className="section-tab">Micropolitan</div>
         </div>
-        <div className="search-results">
-          <div className="empty-search-state">
-            <FiSearch size={32} />
-            <p>Enter search query to find Practice Groups</p>
+        
+        <div className="usa-stat-areas">
+          <div className="stat-area-item">
+            <div className="stat-area-header">
+              <div className="stat-area-title">
+                <h4>Northeast Region</h4>
+                <div className="stat-area-badge">9 States</div>
+              </div>
+              <div className="stat-area-value-wrapper">
+                <span className="stat-area-value">64.5M</span>
+                <span className="stat-area-trend positive">+1.2%</span>
+              </div>
+            </div>
+            <div className="stat-area-bar-wrapper">
+              <div className="stat-area-bar" style={{ width: '75%' }}></div>
+              <div className="stat-area-percentage">18.9% of US</div>
+            </div>
+          </div>
+          
+          <div className="stat-area-item">
+            <div className="stat-area-header">
+              <div className="stat-area-title">
+                <h4>Midwest Region</h4>
+                <div className="stat-area-badge">12 States</div>
+              </div>
+              <div className="stat-area-value-wrapper">
+                <span className="stat-area-value">68.3M</span>
+                <span className="stat-area-trend positive">+0.8%</span>
+              </div>
+            </div>
+            <div className="stat-area-bar-wrapper">
+              <div className="stat-area-bar" style={{ width: '69%' }}></div>
+              <div className="stat-area-percentage">20.1% of US</div>
+            </div>
+          </div>
+          
+          <div className="stat-area-item highlighted">
+            <div className="stat-area-header">
+              <div className="stat-area-title">
+                <h4>South Region</h4>
+                <div className="stat-area-badge">16 States</div>
+              </div>
+              <div className="stat-area-value-wrapper">
+                <span className="stat-area-value">126.2M</span>
+                <span className="stat-area-trend positive">+2.4%</span>
+              </div>
+            </div>
+            <div className="stat-area-bar-wrapper">
+              <div className="stat-area-bar" style={{ width: '92%' }}></div>
+              <div className="stat-area-percentage">37.1% of US</div>
+            </div>
+          </div>
+          
+          <div className="stat-area-item">
+            <div className="stat-area-header">
+              <div className="stat-area-title">
+                <h4>West Region</h4>
+                <div className="stat-area-badge">13 States</div>
+              </div>
+              <div className="stat-area-value-wrapper">
+                <span className="stat-area-value">78.9M</span>
+                <span className="stat-area-trend positive">+1.5%</span>
+              </div>
+            </div>
+            <div className="stat-area-bar-wrapper">
+              <div className="stat-area-bar" style={{ width: '81%' }}></div>
+              <div className="stat-area-percentage">23.9% of US</div>
+            </div>
+          </div>
+          
+          <div className="stat-area-item">
+            <div className="stat-area-header">
+              <div className="stat-area-title">
+                <h4>Metropolitan Areas</h4>
+                <div className="stat-area-badge">384 Areas</div>
+              </div>
+              <div className="stat-area-value-wrapper">
+                <span className="stat-area-value">286.4M</span>
+                <span className="stat-area-trend positive">+1.9%</span>
+              </div>
+            </div>
+            <div className="stat-area-bar-wrapper">
+              <div className="stat-area-bar" style={{ width: '85%' }}></div>
+              <div className="stat-area-percentage">85.8% of US</div>
+            </div>
+          </div>
+          
+          <div className="stat-area-item">
+            <div className="stat-area-header">
+              <div className="stat-area-title">
+                <h4>Micropolitan Areas</h4>
+                <div className="stat-area-badge">543 Areas</div>
+              </div>
+              <div className="stat-area-value-wrapper">
+                <span className="stat-area-value">27.2M</span>
+                <span className="stat-area-trend negative">-0.3%</span>
+              </div>
+            </div>
+            <div className="stat-area-bar-wrapper">
+              <div className="stat-area-bar" style={{ width: '35%' }}></div>
+              <div className="stat-area-percentage">8.1% of US</div>
+            </div>
           </div>
         </div>
       </div>
       
-      <div className="dashboards-section">
-        {/* PG Acquisition Dashboard - Full width */}
-        <div className="dashboard-card full-width" onClick={() => onNavigate('pgdashboard')}>
+      {/* Enhanced Dashboard Cards */}
+      <div className="main-content" style={{ gridColumn: 1, gridRow: 2, display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+        {/* PG Acquisition Dashboard - Enhanced */}
+        <div className="dashboard-card enhanced">
           <div className="dashboard-card-header">
-            <h3>PG Acquisition Dashboard</h3>
-            <div className="dashboard-badge">Primary</div>
+            <div className="dashboard-title">
+              <h3>PG Acquisition Dashboard</h3>
+              <p className="dashboard-subtitle">Performance overview of acquisition funnel</p>
+            </div>
           </div>
+          
+          <div className="dashboard-metrics-summary">
+            <div className="metric-summary-item">
+              <div className="metric-summary-value">89</div>
+              <div className="metric-summary-label">PGs in Pipeline</div>
+              <div className="metric-trend positive">+12.6%</div>
+            </div>
+            <div className="metric-summary-item">
+              <div className="metric-summary-value">12</div>
+              <div className="metric-summary-label">New This Month</div>
+              <div className="metric-trend positive">+4 vs prev</div>
+            </div>
+            <div className="metric-summary-item">
+              <div className="metric-summary-value">4.2</div>
+              <div className="metric-summary-label">Avg. Response (hrs)</div>
+              <div className="metric-trend negative">+0.5 hrs</div>
+            </div>
+          </div>
+          
           <div className="dashboard-preview">
             <div className="funnel-preview">
               <WAVFunnelPreview />
@@ -546,82 +668,118 @@ const LandingPage = ({ onNavigate }) => {
               <AcquisitionGraph />
             </div>
           </div>
-          <div className="dashboard-info">
-            <div className="dashboard-metrics">
-              <div className="metric-item">
-                <span className="metric-value">89</span>
-                <span className="metric-label">PGs in Pipeline</span>
+          
+          <div className="dashboard-footer">
+            <div className="dashboard-pill">
+              <div className="pill-item">
+                <span className="pill-label">Target Progress:</span>
+                <span className="pill-value">77.4%</span>
               </div>
-              <div className="metric-item">
-                <span className="metric-value">12</span>
-                <span className="metric-label">New This Month</span>
-              </div>
-              <div className="metric-item">
-                <span className="metric-value">4.2</span>
-                <span className="metric-label">Avg. Response (hrs)</span>
+              <div className="pill-item">
+                <span className="pill-label">Remaining:</span>
+                <span className="pill-value">26 PGs</span>
               </div>
             </div>
-            <div className="view-details">
+            <div className="view-details" onClick={() => onNavigate('pgdashboard')}>
               View Dashboard <FiArrowRight />
             </div>
           </div>
         </div>
         
-        {/* Response Velocity Dashboard - Half width */}
-        <div className="dashboard-card">
-          <div className="dashboard-card-header">
-            <h3>Response Velocity</h3>
-            <div className="dashboard-badge success">New</div>
-          </div>
-          <div className="dashboard-preview">
-            <div className="preview-content">
-              <ResponseVelocityPreview />
-            </div>
-          </div>
-          <div className="dashboard-info">
-            <div className="dashboard-metrics">
-              <div className="metric-item">
-                <span className="metric-value">28</span>
-                <span className="metric-label">Phone Calls</span>
-              </div>
-              <div className="metric-item">
-                <span className="metric-value">45</span>
-                <span className="metric-label">Emails Sent</span>
+        {/* Secondary Dashboards Row */}
+        <div className="dashboard-row">
+          {/* Customer Success Dashboard - Enhanced */}
+          <div className="dashboard-card enhanced">
+            <div className="dashboard-card-header">
+              <div className="dashboard-title">
+                <h3>Customer Success</h3>
+                <p className="dashboard-subtitle">Response times across communication channels</p>
               </div>
             </div>
-            <div className="view-details">
-              View Dashboard <FiArrowRight />
+            
+            <div className="dashboard-metrics-summary">
+              <div className="metric-summary-item">
+                <div className="metric-summary-value">28</div>
+                <div className="metric-summary-label">Phone Calls</div>
+                <div className="metric-trend positive">1.2hrs avg</div>
+              </div>
+              <div className="metric-summary-item">
+                <div className="metric-summary-value">45</div>
+                <div className="metric-summary-label">Emails Sent</div>
+                <div className="metric-trend negative">6.3hrs avg</div>
+              </div>
+              <div className="metric-summary-item highlight">
+                <div className="metric-summary-value">89%</div>
+                <div className="metric-summary-label">Target Achievement</div>
+                <div className="metric-trend positive">+5% vs prev</div>
+              </div>
             </div>
-          </div>
-        </div>
-        
-        {/* Market Analysis Dashboard - Half width */}
-        <div className="dashboard-card">
-          <div className="dashboard-card-header">
-            <h3>Market Analysis</h3>
-            <div className="dashboard-badge warning">Updated</div>
-          </div>
-          <div className="dashboard-preview">
-            <div className="preview-content with-gradient">
-              <div className="chart-placeholder">
-                <FiBarChart2 size={40} />
-                <span>Market trend analysis & competitive insights</span>
+            
+            <div className="dashboard-preview" style={{ height: '180px', minHeight: 'auto' }}>
+              <div className="preview-content" style={{ width: '100%', padding: '15px' }}>
+                <ResponseVelocityPreview />
+              </div>
+            </div>
+            
+            <div className="dashboard-footer">
+              <div className="dashboard-pill">
+                <div className="pill-item">
+                  <span className="pill-label">Overall Avg:</span>
+                  <span className="pill-value">4.8 hrs</span>
+                </div>
+              </div>
+              <div className="view-details" onClick={() => onNavigate('velocitydashboard')}>
+                View Dashboard <FiArrowRight />
               </div>
             </div>
           </div>
-          <div className="dashboard-info">
-            <div className="dashboard-metrics">
-              <div className="metric-item">
-                <span className="metric-value">5</span>
-                <span className="metric-label">Markets</span>
-              </div>
-              <div className="metric-item">
-                <span className="metric-value">43%</span>
-                <span className="metric-label">Coverage</span>
+          
+          {/* Market Analysis Dashboard - Enhanced */}
+          <div className="dashboard-card enhanced">
+            <div className="dashboard-card-header">
+              <div className="dashboard-title">
+                <h3>Market Analysis</h3>
+                <p className="dashboard-subtitle">Market trends and competitive insights</p>
               </div>
             </div>
-            <div className="view-details">
-              View Dashboard <FiArrowRight />
+            
+            <div className="dashboard-metrics-summary">
+              <div className="metric-summary-item">
+                <div className="metric-summary-value">5</div>
+                <div className="metric-summary-label">Markets</div>
+                <div className="metric-trend positive">+1 new</div>
+              </div>
+              <div className="metric-summary-item">
+                <div className="metric-summary-value">43%</div>
+                <div className="metric-summary-label">Coverage</div>
+                <div className="metric-trend positive">+5.2%</div>
+              </div>
+              <div className="metric-summary-item">
+                <div className="metric-summary-value">18</div>
+                <div className="metric-summary-label">Competitors</div>
+                <div className="metric-trend neutral">No change</div>
+              </div>
+            </div>
+            
+            <div className="dashboard-preview" style={{ height: '180px', minHeight: 'auto' }}>
+              <div className="preview-content with-gradient">
+                <div className="chart-placeholder">
+                  <FiBarChart2 size={40} />
+                  <span>Market trend analysis & competitive insights</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="dashboard-footer">
+              <div className="dashboard-pill">
+                <div className="pill-item">
+                  <span className="pill-label">Growth Potential:</span>
+                  <span className="pill-value">High</span>
+                </div>
+              </div>
+              <div className="view-details" onClick={() => onNavigate('marketdashboard')}>
+                View Dashboard <FiArrowRight />
+              </div>
             </div>
           </div>
         </div>

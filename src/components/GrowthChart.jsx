@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import './GrowthChart.css';
 
 const GrowthChart = ({ data }) => {
   const [selectedStage, setSelectedStage] = useState('all');
-  const [timeRange, setTimeRange] = useState('months');
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipContent, setTooltipContent] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -51,51 +50,204 @@ const GrowthChart = ({ data }) => {
     ]
   };
 
+  // Process the flat array data into a structure with months/weeks/quarters
+  const processedData = useMemo(() => {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return {
+        months: [],
+        weeks: [],
+        quarters: []
+      };
+    }
+
+    // Generate mock stage data based on the input growth data
+    const generateStageData = (item, stageNum) => {
+      return {
+        ...item,
+        name: item.month,  // Use month as the data point name
+        stage: `Stage ${stageNum}`,
+        value: Math.max(5, item.growth * (6 - stageNum) / stageNum)  // Mock formula to generate varied values
+      };
+    };
+
+    // Create array of month-based data points
+    const months = [];
+    const monthSet = new Set();
+    
+    // First, collect all unique months
+    data.forEach(item => {
+      if (item.month) {
+        monthSet.add(item.month);
+      }
+    });
+    
+    // Generate data for each stage for each month
+    Array.from(monthSet).forEach(month => {
+      // Find a sample item for this month
+      const sampleItem = data.find(item => item.month === month);
+      
+      if (sampleItem) {
+        for (let stage = 1; stage <= 5; stage++) {
+          months.push(generateStageData(sampleItem, stage));
+        }
+      }
+    });
+
+    // Generate mock weeks data based on months
+    const weeks = [];
+    const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
+    
+    Array.from(monthSet).forEach(month => {
+      const sampleItem = data.find(item => item.month === month);
+      
+      if (sampleItem) {
+        weekLabels.forEach((weekLabel, index) => {
+          const weekItem = {
+            ...sampleItem,
+            month: `${month} ${weekLabel}`, // Combine month and week
+            name: `${month} ${weekLabel}`
+          };
+          
+          for (let stage = 1; stage <= 5; stage++) {
+            const variance = Math.random() * 10 - 5; // Random variance between -5 and 5
+            weeks.push({
+              ...generateStageData(weekItem, stage),
+              value: Math.max(5, generateStageData(weekItem, stage).value + variance)
+            });
+          }
+        });
+      }
+    });
+
+    // Generate mock quarters data based on months
+    const quarters = [];
+    const quarterMap = {
+      'Jan': 'Q1', 'Feb': 'Q1', 'Mar': 'Q1',
+      'Apr': 'Q2', 'May': 'Q2', 'Jun': 'Q2',
+      'Jul': 'Q3', 'Aug': 'Q3', 'Sep': 'Q3',
+      'Oct': 'Q4', 'Nov': 'Q4', 'Dec': 'Q4'
+    };
+    
+    const quarterSet = new Set();
+    data.forEach(item => {
+      if (item.month && quarterMap[item.month]) {
+        quarterSet.add(quarterMap[item.month]);
+      }
+    });
+    
+    Array.from(quarterSet).forEach(quarter => {
+      // Use an average of the months in the quarter
+      const monthsInQuarter = data.filter(item => quarterMap[item.month] === quarter);
+      
+      if (monthsInQuarter.length > 0) {
+        const avgGrowth = monthsInQuarter.reduce((sum, item) => sum + item.growth, 0) / monthsInQuarter.length;
+        const quarterItem = {
+          ...monthsInQuarter[0],
+          month: quarter,
+          name: quarter,
+          growth: avgGrowth
+        };
+        
+        for (let stage = 1; stage <= 5; stage++) {
+          quarters.push(generateStageData(quarterItem, stage));
+        }
+      }
+    });
+
+    return {
+      months,
+      weeks,
+      quarters
+    };
+  }, [data]);
+
   useEffect(() => {
     // Process data based on timeUnit and create separate data series for each stage
-    const processedData = {};
-    
-    if (data && data[timeUnit]) {
-      // Group data by name (month/week)
-      data[timeUnit].forEach(item => {
-        if (!processedData[item.name]) {
-          processedData[item.name] = {
+    const transformData = () => {
+      if (!processedData || !processedData[timeUnit] || processedData[timeUnit].length === 0) {
+        setChartData([]);
+        return;
+      }
+
+      const groupedData = {};
+      
+      // Group data by name (month/week/quarter)
+      processedData[timeUnit].forEach(item => {
+        if (!groupedData[item.name]) {
+          groupedData[item.name] = {
             name: item.name
           };
         }
         
         // Add value to the corresponding stage
-        processedData[item.name][item.stage] = item.value;
+        groupedData[item.name][item.stage] = item.value;
       });
       
-      // Convert object to array
-      setChartData(Object.values(processedData));
-    }
-  }, [timeUnit, data]);
+      // Convert object to array and sort by time sequence
+      const sortOrder = {
+        // Month order
+        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+        'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+        // Quarter order
+        'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4
+      };
+      
+      const sortData = (a, b) => {
+        const nameA = a.name.split(' ')[0]; // Extract month from "Month Week X"
+        const nameB = b.name.split(' ')[0];
+        
+        if (sortOrder[nameA] && sortOrder[nameB]) {
+          return sortOrder[nameA] - sortOrder[nameB];
+        }
+        
+        return a.name.localeCompare(b.name);
+      };
+      
+      setChartData(Object.values(groupedData).sort(sortData));
+    };
+    
+    transformData();
+  }, [timeUnit, processedData]);
 
   // Filter data based on selected stage and time range
   const getFilteredData = () => {
-    if (selectedStage === 'all') {
-      // For "All Stages", we need to restructure the data to group by time period
-      const timePoints = [...new Set(data[timeRange].map(item => item.name))];
-      
-      return timePoints.map(timePoint => {
-        const pointData = { name: timePoint };
-        
-        // Add each stage's value to the data point
-        Object.keys(stageKpis).forEach(stage => {
-          const stageData = data[timeRange].find(item => item.name === timePoint && item.stage === stage);
-          if (stageData) {
-            pointData[stage] = stageData.value;
-          }
-        });
-        
-        return pointData;
-      });
+    if (!processedData || !processedData[timeUnit]) {
+      return [];
     }
     
-    // For single stage selection, filter by the selected stage
-    return data[timeRange].filter(item => item.stage === selectedStage);
+    if (selectedStage === 'all') {
+      return chartData;
+    }
+    
+    // For single stage selection, prepare data showing only that stage
+    const timePoints = [...new Set(processedData[timeUnit].map(item => item.name))];
+    
+    return timePoints.map(timePoint => {
+      const pointData = { name: timePoint };
+      const stageData = processedData[timeUnit].find(
+        item => item.name === timePoint && item.stage === selectedStage
+      );
+      
+      if (stageData) {
+        pointData[selectedStage] = stageData.value;
+      }
+      
+      return pointData;
+    }).sort((a, b) => {
+      const nameA = a.name.split(' ')[0]; // Extract month from "Month Week X"
+      const nameB = b.name.split(' ')[0];
+      const sortOrder = {
+        'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+        'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+        'Q1': 1, 'Q2': 2, 'Q3': 3, 'Q4': 4
+      };
+      
+      if (sortOrder[nameA] && sortOrder[nameB]) {
+        return sortOrder[nameA] - sortOrder[nameB];
+      }
+      
+      return a.name.localeCompare(b.name);
+    });
   };
 
   const filteredData = getFilteredData();
@@ -141,19 +293,6 @@ const GrowthChart = ({ data }) => {
             )}
           </div>
         </div>
-        
-        <div className="filter-group">
-          <label>Time Period:</label>
-          <select 
-            value={timeRange} 
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="chart-filter"
-          >
-            <option value="weeks">Weeks</option>
-            <option value="months">Months</option>
-            <option value="quarters">Quarters</option>
-          </select>
-        </div>
       </div>
       
       {showTooltip && (
@@ -188,6 +327,12 @@ const GrowthChart = ({ data }) => {
           >
             Monthly
           </button>
+          <button 
+            className={`toggle-button ${timeUnit === 'quarters' ? 'active' : ''}`}
+            onClick={() => setTimeUnit('quarters')}
+          >
+            Quarterly
+          </button>
         </div>
       </div>
       
@@ -217,7 +362,7 @@ const GrowthChart = ({ data }) => {
       <div className="chart-area">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
-            data={chartData}
+            data={filteredData}
             margin={{ top: 10, right: 20, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />

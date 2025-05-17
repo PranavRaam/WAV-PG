@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiX, FiSearch, FiChevronDown, FiInfo, FiArrowRight, FiCheck, FiUser, FiExternalLink, FiPhone, FiMail, FiLinkedin, FiMoreHorizontal, FiCalendar, FiPlus, FiClock, FiCheckCircle, FiFileText } from 'react-icons/fi';
+import { FiX, FiSearch, FiChevronDown, FiInfo, FiArrowRight, FiCheck, FiUser, FiExternalLink, FiPhone, FiMail, FiLinkedin, FiMoreHorizontal, FiCalendar, FiPlus, FiClock, FiCheckCircle, FiFileText, FiUsers, FiTarget, FiRefreshCw } from 'react-icons/fi';
 import { MdLocalHospital } from 'react-icons/md';
 import './StageDetailView.css';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
 import { mockResponseData, getDateRange, isDateInRange } from './ResponseData';
+import TaskTimeline from './TaskTimeline';
+import AddTaskModal from './AddTaskModal';
 
 // Map funnel stages to PG stage values
 const stageMappings = {
@@ -54,14 +56,6 @@ const StageDetailView = ({ stage, onClose }) => {
     type: 'follow-up',
     description: ''
   });
-  
-  // Auto-select PG 7 on component mount to show our realistic timeline
-  useEffect(() => {
-    const pg7 = mockPGData.find(pg => pg.id === 7);
-    if (pg7) {
-      setSelectedPG(pg7);
-    }
-  }, []);
   
   // Mock data for the PG details
   const mockPGData = [
@@ -1356,7 +1350,7 @@ const StageDetailView = ({ stage, onClose }) => {
       {!selectedPG ? (
         <>
           <div className="stage-detail-header">
-            <h1>{stage} Stage Details</h1>
+            <h1>{stageDisplayNames[stageMappings[stage]] || stage} Stage Details</h1>
             <button className="close-button" onClick={onClose}>
               <FiX />
             </button>
@@ -1872,12 +1866,6 @@ const StageDetailView = ({ stage, onClose }) => {
                 <div className="pain-filter">All Issues</div>
               </div>
             </div>
-            
-            {/* Task Timeline Card - NEW COMPONENT */}
-            <TaskTimeline 
-              tasks={mockTaskTimeline[selectedPG.id] || []} 
-              onAddTask={handleAddTask}
-            />
           </div>
           
           {/* Add Task Modal */}
@@ -1889,432 +1877,445 @@ const StageDetailView = ({ stage, onClose }) => {
             onSave={handleSaveTask}
           />
           
-          <div className="growth-metrics-section">
-            <h3>Growth Metrics</h3>
-            <div className="growth-subtitle">Historical data and projections for this PG</div>
-            
-            <div className="growth-filters">
-              <div className="filter-group">
-                <label>Time Period:</label>
-                <select 
-                  value={selectedTimeRange}
-                  onChange={(e) => handleTimeRangeChange(e.target.value)}
-                  className="chart-filter"
-                >
-                  <option value="quarter">Quarters</option>
-                  <option value="month">Months</option>
-                  <option value="week">Weeks</option>
-                </select>
-              </div>
-              
-              <div className="filter-group">
-                <label>View Mode:</label>
-                <div className="toggle-switch">
-                  <input 
-                    type="checkbox" 
-                    id="metrics-toggle" 
-                    checked={showPGSpecificMetrics}
-                    onChange={toggleMetricsView}
-                  />
-                  <label htmlFor="metrics-toggle" className="toggle-label">
-                    <span className="toggle-option">Aggregate</span>
-                    <span className="toggle-slider"></span>
-                    <span className="toggle-option">PG Specific</span>
-                  </label>
-                </div>
-              </div>
+          <div className="side-by-side-container">
+            {/* Task Timeline Card */}
+            <div className="side-by-side-item">
+              <TaskTimeline 
+                tasks={mockTaskTimeline[selectedPG.id] || []} 
+                onAddTask={handleAddTask}
+              />
             </div>
             
-            <div className="time-format-toggle">
-              <button 
-                className={`toggle-button ${timeDisplayFormat === 'Weekly' ? 'active' : ''}`}
-                onClick={() => handleTimeDisplayFormatChange('Weekly')}
-              >
-                Weekly
-              </button>
-              <button 
-                className={`toggle-button ${timeDisplayFormat === 'Monthly' ? 'active' : ''}`}
-                onClick={() => handleTimeDisplayFormatChange('Monthly')}
-              >
-                Monthly
-              </button>
-            </div>
-            
-            <div className="stage-legend">
-              {showPGSpecificMetrics ? (
-                Object.entries(pgMetricsColors).map(([metric, color]) => (
-                  <div key={metric} className="legend-item">
-                    <span className="legend-color" style={{ backgroundColor: color }}></span>
-                    <span>{metric}</span>
-                  </div>
-                ))
-              ) : (
-                Object.entries(stageColors).map(([stage, color]) => (
-                  <div key={stage} className="legend-item">
-                    <span className="legend-color" style={{ backgroundColor: color }}></span>
-                    <span>{stage}</span>
-                  </div>
-                ))
-              )}
-            </div>
-            
-            <div className="chart-container">
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart
-                  data={getCurrentChartData()}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                    domain={showPGSpecificMetrics ? [0, 'dataMax + 20'] : [0, 'dataMax + 100']}
-                    ticks={showPGSpecificMetrics ? undefined : [0, 250, 500, 750, 1000]}
-                  />
-                  <Tooltip 
-                    formatter={(value, name) => [`${value}${name === 'TrustScore' ? '/100' : name === 'Engagement' ? ' min' : ''}`, name]}
-                    labelFormatter={(label) => `${label}`}
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      padding: '8px 12px'
-                    }}
-                  />
-                  
-                  {showPGSpecificMetrics ? (
-                    // PG-specific metrics lines
-                    Object.entries(pgMetricsColors).map(([metric, color]) => (
-                      <Line
-                        key={metric}
-                        type="monotone"
-                        dataKey={metric}
-                        stroke={color}
-                        strokeWidth={2}
-                        dot={{ r: 4, fill: color, stroke: color }}
-                        activeDot={{ r: 6 }}
-                      />
-                    ))
-                  ) : (
-                    // Aggregate view (stages)
-                    selectedStageFilter === 'All Stages' ? (
-                      Object.entries(stageColors).map(([stage, color]) => (
-                        <Line
-                          key={stage}
-                          type="monotone"
-                          dataKey={stage}
-                          stroke={color}
-                          strokeWidth={2}
-                          dot={{ r: 4, fill: color, stroke: color }}
-                          activeDot={{ r: 6 }}
-                        />
-                      ))
-                    ) : (
-                      <Line
-                        type="monotone"
-                        dataKey={selectedStageFilter}
-                        stroke={stageColors[selectedStageFilter]}
-                        strokeWidth={2}
-                        dot={{ r: 4, fill: stageColors[selectedStageFilter], stroke: stageColors[selectedStageFilter] }}
-                        activeDot={{ r: 6 }}
-                      />
-                    )
-                  )}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            
-            <div className="metrics-bottom-row">
-              <div className="stage-duration-card">
-                <div className="chart-header">
-                  <div className="chart-title">
-                    <span className="chart-icon">⏱️</span>
-                    <span>Stage Duration</span>
-                  </div>
-                </div>
+            {/* Growth Metrics Section */}
+            <div className="side-by-side-item">
+              <div className="growth-metrics-section">
+                <h3>Growth Metrics</h3>
+                <div className="growth-subtitle">Historical data and projections for this PG</div>
                 
-                <div className="stage-duration-chart">
-                  <div className="chart-y-axis">
-                    <div className="y-axis-label">Days in Stage</div>
-                    <div className="y-axis-ticks">
-                      <div className="y-tick">30</div>
-                      <div className="y-tick">25</div>
-                      <div className="y-tick">20</div>
-                      <div className="y-tick">15</div>
-                      <div className="y-tick">10</div>
-                      <div className="y-tick">5</div>
-                      <div className="y-tick">0</div>
+                <div className="growth-filters">
+                  <div className="filter-group">
+                    <label>Time Period:</label>
+                    <select 
+                      value={selectedTimeRange}
+                      onChange={(e) => handleTimeRangeChange(e.target.value)}
+                      className="chart-filter"
+                    >
+                      <option value="quarter">Quarters</option>
+                      <option value="month">Months</option>
+                      <option value="week">Weeks</option>
+                    </select>
+                  </div>
+                  
+                  <div className="filter-group">
+                    <label>View Mode:</label>
+                    <div className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        id="metrics-toggle" 
+                        checked={showPGSpecificMetrics}
+                        onChange={toggleMetricsView}
+                      />
+                      <label htmlFor="metrics-toggle" className="toggle-label">
+                        <span className="toggle-option">Aggregate</span>
+                        <span className="toggle-slider"></span>
+                        <span className="toggle-option">PG Specific</span>
+                      </label>
                     </div>
                   </div>
-                  <div className="bar-chart-container">
-                    {['Targets', 'Outreach', 'Pilots', 'Onboarded', 'Premium'].map(stageName => {
-                      const pgData = stageDurationData[selectedPG.id] || defaultStageDuration;
-                      const avgData = stageDurationData.average;
-                      const pgValue = pgData[stageName];
-                      const avgValue = avgData[stageName];
+                </div>
+                
+                <div className="time-format-toggle">
+                  <button 
+                    className={`toggle-button ${timeDisplayFormat === 'Weekly' ? 'active' : ''}`}
+                    onClick={() => handleTimeDisplayFormatChange('Weekly')}
+                  >
+                    Weekly
+                  </button>
+                  <button 
+                    className={`toggle-button ${timeDisplayFormat === 'Monthly' ? 'active' : ''}`}
+                    onClick={() => handleTimeDisplayFormatChange('Monthly')}
+                  >
+                    Monthly
+                  </button>
+                </div>
+                
+                <div className="stage-legend">
+                  {showPGSpecificMetrics ? (
+                    Object.entries(pgMetricsColors).map(([metric, color]) => (
+                      <div key={metric} className="legend-item">
+                        <span className="legend-color" style={{ backgroundColor: color }}></span>
+                        <span>{metric}</span>
+                      </div>
+                    ))
+                  ) : (
+                    Object.entries(stageColors).map(([stage, color]) => (
+                      <div key={stage} className="legend-item">
+                        <span className="legend-color" style={{ backgroundColor: color }}></span>
+                        <span>{stage}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div className="chart-container">
+                  <ResponsiveContainer width="100%" height={350}>
+                    <LineChart
+                      data={getCurrentChartData()}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#64748b', fontSize: 12 }}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#64748b', fontSize: 12 }}
+                        domain={showPGSpecificMetrics ? [0, 'dataMax + 20'] : [0, 'dataMax + 100']}
+                        ticks={showPGSpecificMetrics ? undefined : [0, 250, 500, 750, 1000]}
+                      />
+                      <Tooltip 
+                        formatter={(value, name) => [`${value}${name === 'TrustScore' ? '/100' : name === 'Engagement' ? ' min' : ''}`, name]}
+                        labelFormatter={(label) => `${label}`}
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          padding: '8px 12px'
+                        }}
+                      />
                       
-                      return (
-                        <div key={stageName} className="bar-group">
-                          <div className="bar-pair">
-                            <div 
-                              className="bar pg-bar" 
-                              style={{ 
-                                height: `${(pgValue / 30) * 100}%`,
-                                alignSelf: 'flex-end'
-                              }}
-                              title={`${selectedPG.name}: ${pgValue} days in ${stageName} stage`}
-                            >
-                              <div className="bar-value">{pgValue}</div>
-                            </div>
-                            <div 
-                              className="bar avg-bar" 
-                              style={{ 
-                                height: `${(avgValue / 30) * 100}%`,
-                                alignSelf: 'flex-end'
-                              }}
-                              title={`Average: ${avgValue} days in ${stageName} stage`}
-                            >
-                              <div className="bar-value">{avgValue}</div>
-                            </div>
-                          </div>
-                          <div className="bar-label">{stageName}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                      {showPGSpecificMetrics ? (
+                        // PG-specific metrics lines
+                        Object.entries(pgMetricsColors).map(([metric, color]) => (
+                          <Line
+                            key={metric}
+                            type="monotone"
+                            dataKey={metric}
+                            stroke={color}
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: color, stroke: color }}
+                            activeDot={{ r: 6 }}
+                          />
+                        ))
+                      ) : (
+                        // Aggregate view (stages)
+                        selectedStageFilter === 'All Stages' ? (
+                          Object.entries(stageColors).map(([stage, color]) => (
+                            <Line
+                              key={stage}
+                              type="monotone"
+                              dataKey={stage}
+                              stroke={color}
+                              strokeWidth={2}
+                              dot={{ r: 4, fill: color, stroke: color }}
+                              activeDot={{ r: 6 }}
+                            />
+                          ))
+                        ) : (
+                          <Line
+                            type="monotone"
+                            dataKey={selectedStageFilter}
+                            stroke={stageColors[selectedStageFilter]}
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: stageColors[selectedStageFilter], stroke: stageColors[selectedStageFilter] }}
+                            activeDot={{ r: 6 }}
+                          />
+                        )
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-                
-                <div className="bar-chart-legend">
-                  <div className="legend-item">
-                    <div className="legend-color pg-color"></div>
-                    <span>Current PG</span>
-                  </div>
-                  <div className="legend-item">
-                    <div className="legend-color avg-color"></div>
-                    <span>Average</span>
-                  </div>
-                </div>
-                
-                <div className="duration-stats-row">
-                  {(() => {
-                    const pgData = stageDurationData[selectedPG.id] || defaultStageDuration;
-                    return (
-                      <>
-                        <div className="duration-stat">
-                          <div className="duration-value">{pgData.totalDays}</div>
-                          <div className="duration-label">Total Days</div>
-                        </div>
-                        <div className="duration-stat">
-                          <div className="duration-value">{pgData.longestStageDays}</div>
-                          <div className="duration-label">Longest Stage</div>
-                        </div>
-                        <div className="duration-stat">
-                          <div className="duration-value bottleneck">{pgData.bottleneck}</div>
-                          <div className="duration-label">Bottleneck</div>
-                        </div>
-                      </>
-                    );
-                  })()}
+              </div>
+            </div>
+          </div>
+          
+          <div className="metrics-bottom-row">
+            <div className="stage-duration-card">
+              <div className="chart-header">
+                <div className="chart-title">
+                  <span className="chart-icon">⏱️</span>
+                  <span>Stage Duration</span>
                 </div>
               </div>
               
-              <div className="response-metrics-card">
-                <div className="chart-title">
-                  <span className="chart-icon">⏱️</span>
-                  <span>Response Metrics</span>
-                </div>
-                
-                <div className="response-summary">
-                  <div className="response-summary-text">
-                    <span className="pg-name">{selectedPG.name}</span> response times across all channels
+              <div className="stage-duration-chart">
+                <div className="chart-y-axis">
+                  <div className="y-axis-label">Days in Stage</div>
+                  <div className="y-axis-ticks">
+                    <div className="y-tick">30</div>
+                    <div className="y-tick">25</div>
+                    <div className="y-tick">20</div>
+                    <div className="y-tick">15</div>
+                    <div className="y-tick">10</div>
+                    <div className="y-tick">5</div>
+                    <div className="y-tick">0</div>
                   </div>
                 </div>
-                
-                <div className="pg-response-chart" ref={responseChartRef}>
-                  {(() => {
-                    const responseData = getPGResponseData(selectedPG.name);
-                    const averages = calculateAverages(responseData);
+                <div className="bar-chart-container">
+                  {['Targets', 'Outreach', 'Pilots', 'Onboarded', 'Premium'].map(stageName => {
+                    const pgData = stageDurationData[selectedPG.id] || defaultStageDuration;
+                    const avgData = stageDurationData.average;
+                    const pgValue = pgData[stageName];
+                    const avgValue = avgData[stageName];
                     
                     return (
-                      <>
-                        <div className="response-time-axis">
-                          <div className="time-label">12h</div>
-                          <div className="time-label">6h</div>
-                          <div className="time-label">4h</div>
-                          <div className="time-label">2h</div>
-                          <div className="time-label">1h</div>
-                          <div className="time-label">30min</div>
-                        </div>
-                        
-                        <div className="channels-container">
-                          {/* Phone channel */}
-                          <div className="channel-column">
-                            <div className="channel-icon phone-icon">
-                              <FiPhone />
-                            </div>
-                            <div className="channel-label">Phone</div>
-                            <div className="channel-count">{responseData.phone.length}</div>
-                            <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.phone)}%` }}></div>
-                            <div className="dots-container">
-                              {responseData.phone.map((item, index) => (
-                                <div 
-                                  key={`phone-${index}`}
-                                  className="data-dot"
-                                  style={{
-                                    bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                    left: `${getDatePositionPercentage(item.date, index, responseData.phone.length)}%`,
-                                    backgroundColor: getDotColor(item.responseTime, 'phone')
-                                  }}
-                                  onMouseEnter={(e) => handleDotMouseEnter(e, 'phone', index, responseData)}
-                                  onMouseLeave={handleDotMouseLeave}
-                                />
-                              ))}
-                            </div>
-                            
-                            {/* Average response time */}
-                            <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.phone)}%` }}>
-                              <span className="average-label">{formatResponseTime(averages.phone)}</span>
-                            </div>
+                      <div key={stageName} className="bar-group">
+                        <div className="bar-pair">
+                          <div 
+                            className="bar pg-bar" 
+                            style={{ 
+                              height: `${(pgValue / 30) * 100}%`,
+                              alignSelf: 'flex-end'
+                            }}
+                            title={`${selectedPG.name}: ${pgValue} days in ${stageName} stage`}
+                          >
+                            <div className="bar-value">{pgValue}</div>
                           </div>
-                          
-                          {/* Email channel */}
-                          <div className="channel-column">
-                            <div className="channel-icon email-icon">
-                              <FiMail />
-                            </div>
-                            <div className="channel-label">Email</div>
-                            <div className="channel-count">{responseData.email.length}</div>
-                            <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.email)}%` }}></div>
-                            <div className="dots-container">
-                              {responseData.email.map((item, index) => (
-                                <div 
-                                  key={`email-${index}`}
-                                  className="data-dot"
-                                  style={{
-                                    bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                    left: `${getDatePositionPercentage(item.date, index, responseData.email.length)}%`,
-                                    backgroundColor: getDotColor(item.responseTime, 'email')
-                                  }}
-                                  onMouseEnter={(e) => handleDotMouseEnter(e, 'email', index, responseData)}
-                                  onMouseLeave={handleDotMouseLeave}
-                                />
-                              ))}
-                            </div>
-                            
-                            {/* Average response time */}
-                            <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.email)}%` }}>
-                              <span className="average-label">{formatResponseTime(averages.email)}</span>
-                            </div>
-                          </div>
-                          
-                          {/* LinkedIn channel */}
-                          <div className="channel-column">
-                            <div className="channel-icon linkedin-icon">
-                              <FiLinkedin />
-                            </div>
-                            <div className="channel-label">LinkedIn</div>
-                            <div className="channel-count">{responseData.linkedin.length}</div>
-                            <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.linkedin)}%` }}></div>
-                            <div className="dots-container">
-                              {responseData.linkedin.map((item, index) => (
-                                <div 
-                                  key={`linkedin-${index}`}
-                                  className="data-dot"
-                                  style={{
-                                    bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                    left: `${getDatePositionPercentage(item.date, index, responseData.linkedin.length)}%`,
-                                    backgroundColor: getDotColor(item.responseTime, 'linkedin')
-                                  }}
-                                  onMouseEnter={(e) => handleDotMouseEnter(e, 'linkedin', index, responseData)}
-                                  onMouseLeave={handleDotMouseLeave}
-                                />
-                              ))}
-                            </div>
-                            
-                            {/* Average response time */}
-                            <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.linkedin)}%` }}>
-                              <span className="average-label">{formatResponseTime(averages.linkedin)}</span>
-                            </div>
-                          </div>
-                          
-                          {/* Other channels */}
-                          <div className="channel-column">
-                            <div className="channel-icon other-icon">
-                              <FiMoreHorizontal />
-                            </div>
-                            <div className="channel-label">Others</div>
-                            <div className="channel-count">{responseData.other.length}</div>
-                            <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.other)}%` }}></div>
-                            <div className="dots-container">
-                              {responseData.other.map((item, index) => (
-                                <div 
-                                  key={`other-${index}`}
-                                  className="data-dot"
-                                  style={{
-                                    bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                    left: `${getDatePositionPercentage(item.date, index, responseData.other.length)}%`,
-                                    backgroundColor: getDotColor(item.responseTime, 'other')
-                                  }}
-                                  onMouseEnter={(e) => handleDotMouseEnter(e, 'other', index, responseData)}
-                                  onMouseLeave={handleDotMouseLeave}
-                                />
-                              ))}
-                            </div>
-                            
-                            {/* Average response time */}
-                            <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.other)}%` }}>
-                              <span className="average-label">{formatResponseTime(averages.other)}</span>
-                            </div>
-                          </div>
-                          
-                          {/* Floating tooltip */}
-                          {tooltipContent && (
-                            <div 
-                              className="response-tooltip" 
-                              style={{ 
-                                left: `${tooltipPosition.x}px`, 
-                                top: `${tooltipPosition.y - 10}px`
-                              }}
-                            >
-                              <div className="tooltip-header">
-                                <strong>{tooltipContent.channel}</strong> - {tooltipContent.date}
-                              </div>
-                              <div><span className="tooltip-label">Contact:</span> {tooltipContent.persona}</div>
-                              <div><span className="tooltip-label">Response:</span> {tooltipContent.responseTime}</div>
-                              <div><span className="tooltip-label">Outcome:</span> {tooltipContent.outcome}</div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="response-legend">
-                          <div className="legend-item">
-                            <span className="legend-dot fast"></span>
-                            <span>Fast Response</span>
-                          </div>
-                          <div className="legend-item">
-                            <span className="legend-dot medium"></span>
-                            <span>Medium Response</span>
-                          </div>
-                          <div className="legend-item">
-                            <span className="legend-dot slow"></span>
-                            <span>Slow Response</span>
-                          </div>
-                          <div className="legend-item">
-                            <span className="legend-line"></span>
-                            <span>Target Response Time</span>
+                          <div 
+                            className="bar avg-bar" 
+                            style={{ 
+                              height: `${(avgValue / 30) * 100}%`,
+                              alignSelf: 'flex-end'
+                            }}
+                            title={`Average: ${avgValue} days in ${stageName} stage`}
+                          >
+                            <div className="bar-value">{avgValue}</div>
                           </div>
                         </div>
-                      </>
+                        <div className="bar-label">{stageName}</div>
+                      </div>
                     );
-                  })()}
+                  })}
                 </div>
+              </div>
+              
+              <div className="bar-chart-legend">
+                <div className="legend-item">
+                  <div className="legend-color pg-color"></div>
+                  <span>Current PG</span>
+                </div>
+                <div className="legend-item">
+                  <div className="legend-color avg-color"></div>
+                  <span>Average</span>
+                </div>
+              </div>
+              
+              <div className="duration-stats-row">
+                {(() => {
+                  const pgData = stageDurationData[selectedPG.id] || defaultStageDuration;
+                  return (
+                    <>
+                      <div className="duration-stat">
+                        <div className="duration-value">{pgData.totalDays}</div>
+                        <div className="duration-label">Total Days</div>
+                      </div>
+                      <div className="duration-stat">
+                        <div className="duration-value">{pgData.longestStageDays}</div>
+                        <div className="duration-label">Longest Stage</div>
+                      </div>
+                      <div className="duration-stat">
+                        <div className="duration-value bottleneck">{pgData.bottleneck}</div>
+                        <div className="duration-label">Bottleneck</div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+            
+            <div className="response-metrics-card">
+              <div className="chart-title">
+                <span className="chart-icon">⏱️</span>
+                <span>Response Metrics</span>
+              </div>
+              
+              <div className="response-summary">
+                <div className="response-summary-text">
+                  <span className="pg-name">{selectedPG.name}</span> response times across all channels
+                </div>
+              </div>
+              
+              <div className="pg-response-chart" ref={responseChartRef}>
+                {(() => {
+                  const responseData = getPGResponseData(selectedPG.name);
+                  const averages = calculateAverages(responseData);
+                  
+                  return (
+                    <>
+                      <div className="response-time-axis">
+                        <div className="time-label">12h</div>
+                        <div className="time-label">6h</div>
+                        <div className="time-label">4h</div>
+                        <div className="time-label">2h</div>
+                        <div className="time-label">1h</div>
+                        <div className="time-label">30min</div>
+                      </div>
+                      
+                      <div className="channels-container">
+                        {/* Phone channel */}
+                        <div className="channel-column">
+                          <div className="channel-icon phone-icon">
+                            <FiPhone />
+                          </div>
+                          <div className="channel-label">Phone</div>
+                          <div className="channel-count">{responseData.phone.length}</div>
+                          <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.phone)}%` }}></div>
+                          <div className="dots-container">
+                            {responseData.phone.map((item, index) => (
+                              <div 
+                                key={`phone-${index}`}
+                                className="data-dot"
+                                style={{
+                                  bottom: `${getResponseTimePosition(item.responseTime)}%`,
+                                  left: `${getDatePositionPercentage(item.date, index, responseData.phone.length)}%`,
+                                  backgroundColor: getDotColor(item.responseTime, 'phone')
+                                }}
+                                onMouseEnter={(e) => handleDotMouseEnter(e, 'phone', index, responseData)}
+                                onMouseLeave={handleDotMouseLeave}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Average response time */}
+                          <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.phone)}%` }}>
+                            <span className="average-label">{formatResponseTime(averages.phone)}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Email channel */}
+                        <div className="channel-column">
+                          <div className="channel-icon email-icon">
+                            <FiMail />
+                          </div>
+                          <div className="channel-label">Email</div>
+                          <div className="channel-count">{responseData.email.length}</div>
+                          <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.email)}%` }}></div>
+                          <div className="dots-container">
+                            {responseData.email.map((item, index) => (
+                              <div 
+                                key={`email-${index}`}
+                                className="data-dot"
+                                style={{
+                                  bottom: `${getResponseTimePosition(item.responseTime)}%`,
+                                  left: `${getDatePositionPercentage(item.date, index, responseData.email.length)}%`,
+                                  backgroundColor: getDotColor(item.responseTime, 'email')
+                                }}
+                                onMouseEnter={(e) => handleDotMouseEnter(e, 'email', index, responseData)}
+                                onMouseLeave={handleDotMouseLeave}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Average response time */}
+                          <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.email)}%` }}>
+                            <span className="average-label">{formatResponseTime(averages.email)}</span>
+                          </div>
+                        </div>
+                        
+                        {/* LinkedIn channel */}
+                        <div className="channel-column">
+                          <div className="channel-icon linkedin-icon">
+                            <FiLinkedin />
+                          </div>
+                          <div className="channel-label">LinkedIn</div>
+                          <div className="channel-count">{responseData.linkedin.length}</div>
+                          <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.linkedin)}%` }}></div>
+                          <div className="dots-container">
+                            {responseData.linkedin.map((item, index) => (
+                              <div 
+                                key={`linkedin-${index}`}
+                                className="data-dot"
+                                style={{
+                                  bottom: `${getResponseTimePosition(item.responseTime)}%`,
+                                  left: `${getDatePositionPercentage(item.date, index, responseData.linkedin.length)}%`,
+                                  backgroundColor: getDotColor(item.responseTime, 'linkedin')
+                                }}
+                                onMouseEnter={(e) => handleDotMouseEnter(e, 'linkedin', index, responseData)}
+                                onMouseLeave={handleDotMouseLeave}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Average response time */}
+                          <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.linkedin)}%` }}>
+                            <span className="average-label">{formatResponseTime(averages.linkedin)}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Other channels */}
+                        <div className="channel-column">
+                          <div className="channel-icon other-icon">
+                            <FiMoreHorizontal />
+                          </div>
+                          <div className="channel-label">Others</div>
+                          <div className="channel-count">{responseData.other.length}</div>
+                          <div className="channel-target-line" style={{ bottom: `${getResponseTimePosition(targetResponseTimes.other)}%` }}></div>
+                          <div className="dots-container">
+                            {responseData.other.map((item, index) => (
+                              <div 
+                                key={`other-${index}`}
+                                className="data-dot"
+                                style={{
+                                  bottom: `${getResponseTimePosition(item.responseTime)}%`,
+                                  left: `${getDatePositionPercentage(item.date, index, responseData.other.length)}%`,
+                                  backgroundColor: getDotColor(item.responseTime, 'other')
+                                }}
+                                onMouseEnter={(e) => handleDotMouseEnter(e, 'other', index, responseData)}
+                                onMouseLeave={handleDotMouseLeave}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Average response time */}
+                          <div className="average-line" style={{ bottom: `${getResponseTimePosition(averages.other)}%` }}>
+                            <span className="average-label">{formatResponseTime(averages.other)}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Floating tooltip */}
+                        {tooltipContent && (
+                          <div 
+                            className="response-tooltip" 
+                            style={{ 
+                              left: `${tooltipPosition.x}px`, 
+                              top: `${tooltipPosition.y - 10}px`
+                            }}
+                          >
+                            <div className="tooltip-header">
+                              <strong>{tooltipContent.channel}</strong> - {tooltipContent.date}
+                            </div>
+                            <div><span className="tooltip-label">Contact:</span> {tooltipContent.persona}</div>
+                            <div><span className="tooltip-label">Response:</span> {tooltipContent.responseTime}</div>
+                            <div><span className="tooltip-label">Outcome:</span> {tooltipContent.outcome}</div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="response-legend">
+                        <div className="legend-item">
+                          <span className="legend-dot fast"></span>
+                          <span>Fast Response</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-dot medium"></span>
+                          <span>Medium Response</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-dot slow"></span>
+                          <span>Slow Response</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-line"></span>
+                          <span>Target Response Time</span>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -2324,201 +2325,5 @@ const StageDetailView = ({ stage, onClose }) => {
   );
 };
 
-// Task Timeline Component
-const TaskTimeline = ({ tasks, onAddTask }) => {
-  const getTaskIcon = (type) => {
-    switch (type) {
-      case 'follow-up':
-        return <FiClock />;
-      case 'meeting':
-        return <FiCalendar />;
-      case 'contact':
-        return <FiPhone />;
-      case 'milestone':
-        return <FiCheckCircle />;
-      default:
-        return <FiFileText />;
-    }
-  };
-  
-  const getTaskTypeLabel = (type) => {
-    switch (type) {
-      case 'follow-up':
-        return 'Follow-up';
-      case 'meeting':
-        return 'Meeting';
-      case 'contact':
-        return 'Contact';
-      case 'milestone':
-        return 'Milestone';
-      default:
-        return 'Task';
-    }
-  };
-  
-  const sortedTasks = [...tasks].sort((a, b) => new Date(a.date) - new Date(b.date));
-  const today = new Date();
-  
-  // Calculate days since last contact
-  const getLastContactDays = () => {
-    const contactTasks = tasks.filter(task => task.completed && (task.type === 'contact' || task.type === 'meeting'));
-    if (contactTasks.length === 0) return null;
-    
-    const lastContact = contactTasks.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    const daysSince = Math.floor((today - new Date(lastContact.date)) / (1000 * 60 * 60 * 24));
-    
-    // Ensure the displayed days are realistic (max 45 days)
-    const maxDays = 45;
-    const displayDays = Math.min(daysSince, maxDays);
-    
-    return { days: displayDays, task: lastContact };
-  };
-  
-  const lastContactInfo = getLastContactDays();
-  
-  // Get next upcoming task
-  const getNextTask = () => {
-    const upcomingTasks = tasks.filter(task => !task.completed && new Date(task.date) >= today);
-    if (upcomingTasks.length === 0) return null;
-    
-    return upcomingTasks.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
-  };
-  
-  const nextTask = getNextTask();
-  
-  return (
-    <div className="detail-card task-timeline-card">
-      <div className="detail-card-header">
-        <div className="detail-card-title">
-          <span className="detail-icon">📅</span>
-          Task Timeline
-        </div>
-        <button className="add-task-button" onClick={onAddTask}>
-          <FiPlus /> Add Task
-        </button>
-      </div>
-      
-      <div className="timeline-summary">
-        {lastContactInfo && (
-          <div className="timeline-stat">
-            <div className="timeline-stat-value">
-              {lastContactInfo.days} {lastContactInfo.days === 1 ? 'day' : 'days'}
-            </div>
-            <div className="timeline-stat-label">
-              Since last contact
-            </div>
-          </div>
-        )}
-        
-        {nextTask && (
-          <div className="timeline-stat">
-            <div className="timeline-stat-value">
-              {getTaskTypeLabel(nextTask.type)}
-            </div>
-            <div className="timeline-stat-label">
-              Next: {nextTask.title} ({new Date(nextTask.date).toLocaleDateString()})
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div className="task-timeline">
-        {sortedTasks.map((task, index) => {
-          const taskDate = new Date(task.date);
-          const isPast = taskDate < today;
-          const isToday = taskDate.toDateString() === today.toDateString();
-          const isFuture = taskDate > today;
-          
-          return (
-            <div 
-              key={task.id} 
-              className={`timeline-item ${task.completed ? 'completed' : ''} ${isPast ? 'past' : ''} ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''}`}
-            >
-              <div className="timeline-connector">
-                <div className="connector-line"></div>
-                <div className={`connector-dot ${task.type}`}>
-                  {getTaskIcon(task.type)}
-                </div>
-              </div>
-              <div className="timeline-content">
-                <div className="timeline-header">
-                  <div className="timeline-title">{task.title}</div>
-                  <div className="timeline-date">{new Date(task.date).toLocaleDateString()}</div>
-                </div>
-                <div className="timeline-description">{task.description}</div>
-                <div className="timeline-type">
-                  <span className={`task-type-badge ${task.type}`}>{getTaskTypeLabel(task.type)}</span>
-                  {task.completed && <span className="task-completed-badge"><FiCheck /> Completed</span>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// Add Task Modal Component
-const AddTaskModal = ({ show, onClose, task, setTask, onSave }) => {
-  if (!show) return null;
-  
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h3>Add New Task</h3>
-          <button className="close-button" onClick={onClose}>
-            <FiX />
-          </button>
-        </div>
-        <div className="modal-body">
-          <div className="form-group">
-            <label>Task Title</label>
-            <input 
-              type="text" 
-              value={task.title} 
-              onChange={e => setTask({...task, title: e.target.value})}
-              placeholder="Enter task title"
-            />
-          </div>
-          <div className="form-group">
-            <label>Due Date</label>
-            <input 
-              type="date" 
-              value={task.dueDate} 
-              onChange={e => setTask({...task, dueDate: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Task Type</label>
-            <select 
-              value={task.type} 
-              onChange={e => setTask({...task, type: e.target.value})}
-            >
-              <option value="follow-up">Follow-up</option>
-              <option value="meeting">Meeting</option>
-              <option value="contact">Contact</option>
-              <option value="milestone">Milestone</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Description</label>
-            <textarea 
-              value={task.description} 
-              onChange={e => setTask({...task, description: e.target.value})}
-              placeholder="Enter task description"
-              rows={3}
-            />
-          </div>
-        </div>
-        <div className="modal-footer">
-          <button className="cancel-button" onClick={onClose}>Cancel</button>
-          <button className="save-button" onClick={onSave}>Save Task</button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default StageDetailView; 

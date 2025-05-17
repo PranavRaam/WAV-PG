@@ -223,12 +223,34 @@ body {
   gap: 1.5rem;
 }
 
+/* Main content area for stacked dashboards */
+.main-content {
+  width: 100%;
+}
+
+.main-content .dashboard-card {
+  margin-bottom: 0;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+  background-color: var(--color-card);
+  overflow: hidden;
+}
+
+.main-content .dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(79, 70, 229, 0.2);
+  transition: var(--transition);
+}
+
+/* Dashboard card styling */
 .dashboard-card {
   border-radius: var(--radius-md);
   padding: 1.5rem;
   background-color: var(--color-card);
   box-shadow: var(--shadow-sm);
-  cursor: pointer;
+  cursor: default;
   transition: var(--transition);
   border: 1px solid var(--color-border);
   position: relative;
@@ -320,11 +342,17 @@ body {
   font-weight: 500;
   font-size: 0.85rem;
   transition: var(--transition);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background-color: rgba(79, 70, 229, 0.05);
 }
 
 .view-details:hover {
   gap: 0.75rem;
-  color: var(--color-secondary);
+  color: white;
+  background-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Sidebar info */
@@ -1040,5 +1068,555 @@ body {
   .goals-section {
     flex-direction: column;
     gap: 1rem;
+  }
+}
+
+/* Response Velocity Horizontal Layout */
+.response-velocity-horizontal {
+  width: 100%;
+}
+
+.response-velocity-horizontal .chart-content {
+  padding: 0 10px;
+}
+
+.response-velocity-horizontal .chart-channels {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 15px;
+}
+
+.response-velocity-horizontal .channel {
+  flex: 1;
+  min-width: 180px;
+  max-width: 300px;
+  position: relative;
+  border-radius: var(--radius-sm);
+  padding: 15px;
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  transition: var(--transition);
+}
+
+.response-velocity-horizontal .channel:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary-light);
+}
+
+.response-velocity-horizontal .channel-info {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.response-velocity-horizontal .channel-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.response-velocity-horizontal .channel-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.response-velocity-horizontal .channel-chart {
+  height: 90px;
+  margin-top: 15px;
+  position: relative;
+  border-top: 1px solid var(--color-border);
+  padding-top: 10px;
+}
+
+.response-velocity-horizontal .chart-header {
+  margin-bottom: 25px;
+}
+
+.response-velocity-horizontal .chart-header h4 {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  text-align: center;
+  position: relative;
+}
+
+.response-velocity-horizontal .chart-header h4:after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-end));
+  border-radius: 3px;
+}
+
+.response-velocity-horizontal .chart-legend {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 20px;
+}
+
+/* USA Statistical Areas */
+.usa-stat-areas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 5px;
+}
+
+.stat-area-item {
+  background-color: var(--color-background);
+  border-radius: var(--radius-sm);
+  padding: 15px;
+  border: 1px solid var(--color-border);
+  transition: var(--transition);
+}
+
+.stat-area-item:hover {
+  border-color: var(--color-primary-light);
+  transform: translateX(5px);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-area-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.stat-area-header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.stat-area-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.stat-area-bar {
+  height: 6px;
+  background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-end));
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+.stat-area-details {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-light);
+  font-size: 0.75rem;
+}
+
+/* Search results (old styles, keeping for reference) */
+.search-results {
+  flex: 1;
+  min-height: 300px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light);
+  font-size: 0.875rem;
+  background-color: rgba(248, 250, 252, 0.5);
+}
+
+/* Enhanced goal cards */
+.goal-card-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 15px;
+}
+
+.goal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(var(--color-gradient-start-rgb), 0.12), rgba(var(--color-gradient-end-rgb), 0.12));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.goal-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.goal-content h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.goal-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.goal-progress-bar {
+  height: 8px;
+  background-color: var(--color-primary-light);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.goal-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-end));
+  border-radius: 4px;
+}
+
+/* Enhanced statistical areas */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background);
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-button:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary-light);
+  background: var(--color-primary-light);
+}
+
+.section-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
+}
+
+.section-tab {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.section-tab:hover {
+  color: var(--color-primary);
+  background: rgba(var(--color-gradient-start-rgb), 0.05);
+}
+
+.section-tab.active {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.stat-area-item {
+  padding: 12px 16px;
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.stat-area-item.highlighted {
+  background-color: rgba(var(--color-gradient-start-rgb), 0.04);
+  border-color: var(--color-primary-light);
+}
+
+.stat-area-item:hover {
+  transform: translateX(5px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-primary-light);
+}
+
+.stat-area-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-area-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.stat-area-value-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-area-trend {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.stat-area-trend.positive {
+  color: var(--color-success);
+}
+
+.stat-area-trend.negative {
+  color: var(--color-danger);
+}
+
+.stat-area-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-area-percentage {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  text-align: right;
+}
+
+/* Enhanced dashboard cards */
+.dashboard-card.enhanced {
+  padding: 1.25rem;
+  transition: var(--transition);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: visible;
+}
+
+.dashboard-card.enhanced:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-8px);
+}
+
+.dashboard-title {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dashboard-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.dashboard-badge.primary {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.dashboard-metrics-summary {
+  display: flex;
+  gap: 15px;
+  margin: 15px 0;
+  padding: 15px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.metric-summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+  padding: 10px 15px;
+  border-radius: var(--radius-sm);
+  background-color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-summary-item.highlight {
+  background: linear-gradient(135deg, rgba(var(--color-gradient-start-rgb), 0.08), rgba(var(--color-gradient-end-rgb), 0.08));
+  border: 1px solid rgba(var(--color-gradient-start-rgb), 0.1);
+}
+
+.metric-summary-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 5px;
+}
+
+.metric-summary-label {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  margin-bottom: 5px;
+}
+
+.metric-trend {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--color-background);
+  display: inline-block;
+}
+
+.metric-trend.positive {
+  color: var(--color-success);
+}
+
+.metric-trend.negative {
+  color: var(--color-danger);
+}
+
+.metric-trend.neutral {
+  color: var(--color-text-light);
+}
+
+.dashboard-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.dashboard-pill {
+  display: flex;
+  gap: 15px;
+  background-color: var(--color-background);
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.pill-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pill-label {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+}
+
+.pill-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Dashboard row for side-by-side cards */
+.dashboard-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.dashboard-row .dashboard-card {
+  flex: 1;
+  min-width: 0; /* Allow cards to shrink below their content size */
+}
+
+.dashboard-row .dashboard-preview {
+  overflow: hidden;
+}
+
+.dashboard-row .response-velocity-horizontal .chart-channels {
+  flex-wrap: wrap;
+}
+
+.dashboard-row .response-velocity-horizontal .channel {
+  min-width: 140px;
+  flex-basis: calc(50% - 10px);
+}
+
+@media (max-width: 1200px) {
+  .dashboard-row {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+}
+
+/* Compact legend and other optimizations for side-by-side layout */
+.chart-legend.compact {
+  margin-top: 10px;
+  gap: 15px;
+  font-size: 0.7rem;
+}
+
+.dashboard-row .response-velocity-horizontal .chart-header {
+  margin-bottom: 15px;
+}
+
+.dashboard-row .response-velocity-horizontal .chart-header h4 {
+  font-size: 0.95rem;
+}
+
+.dashboard-row .response-velocity-horizontal .channel {
+  padding: 10px;
+}
+
+.dashboard-row .response-velocity-horizontal .channel-chart {
+  height: 70px;
+}
+
+.dashboard-row .response-velocity-horizontal .target-label,
+.dashboard-row .response-velocity-horizontal .average-label {
+  font-size: 0.65rem;
+  padding: 2px 4px;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 1400px) {
+  .dashboard-row .dashboard-metrics-summary {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .dashboard-row .metric-summary-item {
+    padding: 8px 10px;
+  }
+  
+  .dashboard-row .metric-summary-value {
+    font-size: 1.3rem;
   }
 } 
