@@ -1724,9 +1724,10 @@ input:not(:checked) + .toggle-label .toggle-option:last-child {
 .pg-response-chart {
   flex-grow: 1;
   position: relative;
-  min-height: 360px;
+  min-height: 380px; /* Increased to accommodate week structure */
   margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 40px; /* Increased to give more space for week labels */
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .channels-container {
@@ -1735,8 +1736,9 @@ input:not(:checked) + .toggle-label .toggle-option:last-child {
   height: 300px;
   position: relative;
   margin-left: 50px;
-  padding-bottom: 40px;
+  padding-bottom: 60px; /* Increased to accommodate week labels */
   gap: 10px;
+  position: relative;
 }
 
 /* Horizontal grid lines */
@@ -2701,4 +2703,56 @@ input:not(:checked) + .toggle-label .toggle-option:last-child {
 
 .side-by-side-item > .growth-metrics-section .recharts-responsive-container {
   min-height: 300px !important;
+}
+
+.week-labels {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #374151;
+  z-index: 10;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.week-label {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-weight: 600;
+  background-color: #f8fafc;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.week-grid-lines {
+  position: absolute;
+  top: 0;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.week-grid-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(203, 213, 225, 0.8);
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+/* Hide any date labels at the bottom of the response chart to avoid confusion */
+.dots-container::after {
+  display: none;
 } 

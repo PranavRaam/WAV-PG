@@ -2052,9 +2052,9 @@
   left: 45px;
   right: 10px;
   height: 0;
-  border-top: 2px dashed #ff6b6b; /* Red dashed line */
-  top: 52%; /* Adjusted to match the 6h mark */
-  z-index: 4;
+  border-top: 2px dashed var(--color-target-line);
+  z-index: 20;
+  pointer-events: none;
 }
 
 .global-average-line {
@@ -2062,58 +2062,121 @@
   left: 45px;
   right: 10px;
   height: 0;
-  border-top: 2px solid #333; /* Solid black line */
-  top: 65%; /* Adjusted to match the average line height in image */
-  z-index: 3;
+  border-top: 2px solid var(--color-average-line);
+  z-index: 20;
+  pointer-events: none;
 }
 
-/* Data points */
-.data-dot {
+.target-label, .average-label {
   position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  transform: translate(-50%, 50%);
-  background-color: #0050C9; /* Blue dots */
+  right: 10px;
+  top: -18px;
+  font-size: 11px;
+  background-color: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.target-label {
+  color: var(--color-target-line);
+}
+
+.average-label {
+  color: var(--color-average-line);
+}
+
+/* Channel Zones - Better structure for lines within zones */
+.channel-zones {
+  position: absolute;
+  top: 80px;
+  bottom: 30px;
+  left: 45px;
+  right: 10px;
+  z-index: 5;
+  display: flex;
+  pointer-events: none;
+}
+
+.channel-zone {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  border-right: 1px dashed rgba(200, 200, 200, 0.4);
+}
+
+.channel-zone:last-child {
+  border-right: none;
+}
+
+/* Improved Channel-specific target and average lines */
+.channel-zone .channel-target-line {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  width: 90%;
+  height: 0;
+  border-top: 2px dashed var(--color-target-line);
   z-index: 10;
 }
 
-.data-dot:hover {
-  transform: translate(-50%, 50%) scale(1.5);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
-  z-index: 20;
+.channel-zone .channel-average-line {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  width: 90%;
+  height: 0;
+  border-top: 2px solid var(--color-average-line);
+  z-index: 9;
 }
 
-/* Legend */
-.legend-line.target {
-  border-top: 2px dashed #ff6b6b;
-  width: 30px;
-  display: inline-block;
-  vertical-align: middle;
+.zone-label {
+  position: absolute;
+  right: 5px;
+  top: -16px;
+  font-size: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 1px 4px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
 }
 
-.legend-line.average {
-  border-top: 2px solid #333;
-  width: 30px;
-  display: inline-block;
-  vertical-align: middle;
+.channel-target-line .zone-label {
+  color: var(--color-target-line);
 }
 
-/* Channel styling */
-.channel-column {
-  position: relative;
-  background-color: rgba(250, 250, 250, 0.3);
-  border-radius: 4px;
-  border: 1px solid #eee;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  padding-top: 50px;
-  height: 100%;
+.channel-average-line .zone-label {
+  color: var(--color-average-line);
 }
 
-/* Timeline layout with icons at top */
+/* Improved color zones for visual separation */
+.phone-zone {
+  background-color: rgba(66, 133, 244, 0.05);
+}
+
+.email-zone {
+  background-color: rgba(219, 68, 55, 0.05);
+}
+
+.linkedin-zone {
+  background-color: rgba(0, 119, 181, 0.05);
+}
+
+.other-zone {
+  background-color: rgba(52, 168, 83, 0.05);
+}
+
+/* Improve dots visibility */
+.data-dot {
+  width: 8px;
+  height: 8px;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+  z-index: 15;
+}
+
+/* Timeline container and related elements */
 .timeline-container {
   position: relative;
   width: 100%;
@@ -2165,54 +2228,7 @@
   transform: translateX(-50%);
 }
 
-/* Channel icons with proper colors matching the image */
-.channel-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  color: white;
-  margin-bottom: 5px;
-}
-
-.phone-icon {
-  background-color: #4285F4; /* Blue box for phone */
-}
-
-.email-icon {
-  background-color: #DB4437; /* Red box for email */
-}
-
-.linkedin-icon {
-  background-color: #0077B5; /* LinkedIn blue */
-}
-
-.other-icon {
-  background-color: #34A853; /* Green for others */
-}
-
-/* Channel labels aligned with the image */
-.channel-label {
-  font-weight: 500;
-  font-size: 14px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Dots container for scattered data points */
-.dots-container {
-  position: absolute;
-  top: 80px;
-  bottom: 30px;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: calc(100% - 110px);
-}
-
-/* Response dots */
+/* Data points */
 .data-dot {
   position: absolute;
   width: 8px;
@@ -2220,88 +2236,13 @@
   border-radius: 50%;
   transform: translate(-50%, 50%);
   background-color: #0050C9; /* Blue dots */
-  z-index: 6;
+  z-index: 10;
 }
 
 .data-dot:hover {
   transform: translate(-50%, 50%) scale(1.5);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
-  z-index: 10;
-}
-
-/* Global target and average lines */
-.global-target-line {
-  position: absolute;
-  left: 45px;
-  right: 10px;
-  height: 0;
-  border-top: 2px dashed #ff6b6b; /* Red dashed line */
-  top: 52%; /* Position for 6h mark */
-  z-index: 4;
-}
-
-.global-average-line {
-  position: absolute;
-  left: 45px;
-  right: 10px;
-  height: 0;
-  border-top: 2px solid #333; /* Solid black line */
-  top: 70%; /* Position for 2h mark */
-  z-index: 3;
-}
-
-/* Date axis */
-.date-axis {
-  position: absolute;
-  bottom: 0;
-  left: 45px;
-  right: 10px;
-  height: 30px;
-  z-index: 5;
-}
-
-.date-label {
-  position: absolute;
-  font-size: 12px;
-  color: #64748b;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-
-/* Time axis */
-.response-time-axis {
-  position: absolute;
-  left: 0;
-  top: 10px;
-  bottom: 30px;
-  width: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 0;
-  z-index: 2;
-}
-
-.time-label {
-  font-size: 12px;
-  color: #64748b;
-  text-align: right;
-  padding-right: 8px;
-  white-space: nowrap;
-}
-
-/* Response back time label (y-axis title) */
-.pg-response-chart::before {
-  content: "Response back time";
-  position: absolute;
-  left: -40px;
-  top: 50%;
-  transform: rotate(-90deg) translateX(50%);
-  transform-origin: left center;
-  font-size: 12px;
-  color: #64748b;
-  white-space: nowrap;
-  z-index: 1;
+  z-index: 20;
 }
 
 /* Channel-specific dots */
@@ -2329,62 +2270,38 @@
   box-shadow: 0 0 4px rgba(52, 168, 83, 0.6);
 }
 
-/* Channel zones for visual separation */
-.channel-zones {
-  position: absolute;
-  top: 80px;
-  bottom: 30px;
-  left: 45px;
-  right: 10px;
-  z-index: 1;
-  display: flex;
-  pointer-events: none;
-}
-
-.channel-zone {
-  flex: 1;
-  border-right: 1px dashed rgba(200, 200, 200, 0.4);
-  position: relative;
-}
-
-.phone-zone {
-  background-color: rgba(66, 133, 244, 0.03);
-}
-
-.email-zone {
-  background-color: rgba(219, 68, 55, 0.03);
-}
-
-.linkedin-zone {
-  background-color: rgba(0, 119, 181, 0.03);
-}
-
-.other-zone {
-  background-color: rgba(52, 168, 83, 0.03);
-  border-right: none;
-}
-
 /* Hover effects for dots */
 .phone-dot:hover {
   background-color: #4285F4;
-  transform: translate(-50%, 50%) scale(1.8);
+  transform: translate(-50%, 50%) scale(1.5);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 6px rgba(66, 133, 244, 0.8);
 }
 
 .email-dot:hover {
   background-color: #DB4437;
-  transform: translate(-50%, 50%) scale(1.8);
+  transform: translate(-50%, 50%) scale(1.5);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 6px rgba(219, 68, 55, 0.8);
 }
 
 .linkedin-dot:hover {
   background-color: #0077B5;
-  transform: translate(-50%, 50%) scale(1.8);
+  transform: translate(-50%, 50%) scale(1.5);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 6px rgba(0, 119, 181, 0.8);
 }
 
 .other-dot:hover {
   background-color: #34A853;
-  transform: translate(-50%, 50%) scale(1.8);
+  transform: translate(-50%, 50%) scale(1.5);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 6px rgba(52, 168, 83, 0.8);
+}
+
+/* Dots container for scattered data points */
+.dots-container {
+  position: absolute;
+  top: 80px;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: calc(100% - 110px);
 } 

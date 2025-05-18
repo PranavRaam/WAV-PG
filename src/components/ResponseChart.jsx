@@ -100,6 +100,16 @@ const COLORS = {
   poor: 'var(--color-danger)'
 };
 
+// Helper: Get week number for a date (ISO week)
+function getWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+  return `${d.getUTCFullYear()}-W${weekNum}`;
+}
+
 const ResponseChart = ({ searchQuery = '' }) => {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -680,6 +690,44 @@ const ResponseChart = ({ searchQuery = '' }) => {
     }
   };
 
+  // Group data by week for each channel
+  const weeklyTrends = useMemo(() => {
+    const result = { phone: {}, email: {}, linkedin: {}, other: {} };
+    Object.keys(filteredData).forEach(channel => {
+      filteredData[channel].forEach(item => {
+        const week = getWeekNumber(new Date(item.date));
+        if (!result[channel][week]) result[channel][week] = { sum: 0, count: 0, target: 0 };
+        result[channel][week].sum += item.responseTime * 60; // convert to minutes
+        result[channel][week].count += 1;
+        // If target changes over time, set it here. For now, use fixed target.
+        result[channel][week].target = item.target || targetResponseTimes[channel];
+      });
+    });
+    // Convert to array of {week, avg, target}
+    const toArr = (obj) => Object.entries(obj).map(([week, v]) => ({ week, avg: v.sum/v.count, target: v.target }));
+    return {
+      phone: toArr(result.phone),
+      email: toArr(result.email),
+      linkedin: toArr(result.linkedin),
+      other: toArr(result.other)
+    };
+  }, [filteredData]);
+
+  // Helper: Get X position for a week (0-100%)
+  const weekKeys = Array.from(new Set([
+    ...weeklyTrends.phone.map(w => w.week),
+    ...weeklyTrends.email.map(w => w.week),
+    ...weeklyTrends.linkedin.map(w => w.week),
+    ...weeklyTrends.other.map(w => w.week)
+  ])).sort();
+  const getWeekX = (week) => {
+    const idx = weekKeys.indexOf(week);
+    return weekKeys.length > 1 ? (idx/(weekKeys.length-1))*100 : 50;
+  };
+
+  // Helper: Get Y position for a value in minutes (0-100%, 0=bottom)
+  const getY = (minutes) => 100-Math.max((minutes/1080)*100, 5);
+
   return (
     <div className={`response-chart-container ${isLoading ? 'loading' : ''}`}>
       <div className="chart-header">
@@ -1062,9 +1110,69 @@ const ResponseChart = ({ searchQuery = '' }) => {
               <div className="time-label">1h</div>
             </div>
             
-            {/* Global target and average lines */}
-            <div className="global-target-line"></div>
-            <div className="global-average-line"></div>
+            {/* Channel-specific lines are cleaner and positioned better within their zones */}
+            <div className="channel-zones">
+              {/* Helper to calculate bottom position with clamping */}
+              {(() => {
+                // Helper function to get clamped bottom %
+                const getBottomPercent = (minutes) => {
+                  const percent = (minutes / 1080) * 100;
+                  return Math.max(percent, 5); // Clamp to at least 5% from bottom
+                };
+                // Helper to render a line if value > 0
+                const renderLine = (type, value, label) => {
+                  if (!value || value <= 0 || isNaN(value)) return null;
+                  const bottom = getBottomPercent(value);
+                  // If line is close to bottom, put label above the line
+                  const labelStyle = bottom < 12 ? { bottom: '18px', top: 'auto' } : {};
+                  return (
+                    <div className={`channel-${type}-line`} style={{ bottom: `${bottom}%` }}>
+                      <span className="zone-label" style={labelStyle}>{label}</span>
+                    </div>
+                  );
+                };
+                return (
+                  <>
+                    <div className="channel-zone phone-zone">
+                      {renderLine('target', targetResponseTimes.phone, 'T: 10m')}
+                      {renderLine('average', channelStats[0].avg * 60, `A: ${formatResponseTime(channelStats[0].avg)}`)}
+                    </div>
+                    <div className="channel-zone email-zone">
+                      {renderLine('target', targetResponseTimes.email, 'T: 30m')}
+                      {renderLine('average', channelStats[1].avg * 60, `A: ${formatResponseTime(channelStats[1].avg)}`)}
+                    </div>
+                    <div className="channel-zone linkedin-zone">
+                      {renderLine('target', targetResponseTimes.linkedin, 'T: 1h')}
+                      {renderLine('average', channelStats[2].avg * 60, `A: ${formatResponseTime(channelStats[2].avg)}`)}
+                    </div>
+                    <div className="channel-zone other-zone">
+                      {renderLine('target', targetResponseTimes.other, 'T: 2h')}
+                      {renderLine('average', channelStats[3].avg * 60, `A: ${formatResponseTime(channelStats[3].avg)}`)}
+                    </div>
+                  </>
+                );
+              })()}
+              {/* Weekly trend lines for each channel */}
+              {['phone','email','linkedin','other'].map(channel => (
+                <svg key={channel} className={`trend-svg trend-svg-${channel}`} style={{position:'absolute',left:0,top:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:20}}>
+                  {/* Target trend line */}
+                  <polyline
+                    fill="none"
+                    stroke="#f87171"
+                    strokeDasharray="6 3"
+                    strokeWidth="2"
+                    points={weeklyTrends[channel].map(w => `${getWeekX(w.week)}%,${getY(w.target)}%`).join(' ')}
+                  />
+                  {/* Average trend line */}
+                  <polyline
+                    fill="none"
+                    stroke="#222"
+                    strokeWidth="2"
+                    points={weeklyTrends[channel].map(w => `${getWeekX(w.week)}%,${getY(w.avg)}%`).join(' ')}
+                  />
+                </svg>
+              ))}
+            </div>
             
             <div className="timeline-container">
               {/* Channel icons on top */}

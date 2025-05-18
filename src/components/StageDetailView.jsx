@@ -758,77 +758,57 @@ const StageDetailView = ({ stage, onClose }) => {
 
   // Get response data for a specific PG
   const getPGResponseData = (pgName) => {
-    // Create mock data for the selected PG
+    // Create mock data for the selected PG with 5 weeks
     const pgResponseData = {
-      phone: mockResponseData.phone.filter(item => item.pgName === pgName || item.pgName.includes(pgName.split(' ')[0])).slice(0, 8),
-      email: mockResponseData.email.filter(item => item.pgName === pgName || item.pgName.includes(pgName.split(' ')[0])).slice(0, 8),
-      linkedin: mockResponseData.linkedin.filter(item => item.pgName === pgName || item.pgName.includes(pgName.split(' ')[0])).slice(0, 6),
-      other: mockResponseData.other.filter(item => item.pgName === pgName || item.pgName.includes(pgName.split(' ')[0])).slice(0, 5)
+      phone: [],
+      email: [],
+      linkedin: [],
+      other: []
     };
     
-    // If we don't have enough data for this PG, generate some
-    const ensureMinimumData = (channel, minCount) => {
-      if (pgResponseData[channel].length < minCount) {
-        // Create default data based on the PG name
-        const defaultData = [];
+    // Generate 5 weeks of response data for each channel
+    const generateWeeklyData = (channel, responseCounts) => {
+      const data = [];
+      
+      // Calculate a seed based on PG name for consistent randomness
+      const pgNameHash = pgName.split('').reduce((hash, char) => char.charCodeAt(0) + hash, 0);
+      
+      // Create a distribution of response times appropriate for each channel
+      let responseTimes;
+      switch (channel) {
+        case 'phone':
+          // Phone should have mostly fast responses (< 2h)
+          responseTimes = [0.3, 0.5, 0.8, 1.1, 1.3, 1.6, 1.9, 2.2];
+          break;
+        case 'email':
+          // Email with medium response times (2-4h)
+          responseTimes = [1.8, 2.3, 2.8, 3.2, 3.7, 4.1, 4.5, 4.9];
+          break;
+        case 'linkedin':
+          // LinkedIn with longer responses (3-6h)
+          responseTimes = [3.2, 3.8, 4.5, 5.0, 5.5, 6.2];
+          break;
+        default: // other
+          // Other channels with a mix (1-3h)
+          responseTimes = [1.1, 1.5, 1.9, 2.3, 2.8];
+      }
+      
+      // Generate data for each week
+      for (let week = 1; week <= 5; week++) {
+        // Get count for this week (can vary based on channel)
+        const count = responseCounts[week - 1] || 1;
         
-        // Calculate a seed based on PG name for consistent randomness
-        const pgNameHash = pgName.split('').reduce((hash, char) => char.charCodeAt(0) + hash, 0);
-        
-        // Different date ranges for each channel to avoid overlap
-        const datePeriods = {
-          phone: { start: 45, end: 3 },     // 45-3 days ago
-          email: { start: 40, end: 5 },     // 40-5 days ago
-          linkedin: { start: 35, end: 7 },  // 35-7 days ago 
-          other: { start: 30, end: 2 }      // 30-2 days ago
-        };
-        
-        // Get date range for this channel
-        const period = datePeriods[channel] || { start: 30, end: 2 };
-        
-        // Create a distribution of response times appropriate for each channel
-        let responseTimes;
-        switch (channel) {
-          case 'phone':
-            // Phone should have mostly fast responses (< 2h)
-            responseTimes = [0.3, 0.5, 0.8, 1.1, 1.3, 1.6, 1.9, 2.2];
-            break;
-          case 'email':
-            // Email with medium response times (2-4h)
-            responseTimes = [1.8, 2.3, 2.8, 3.2, 3.7, 4.1, 4.5, 4.9];
-            break;
-          case 'linkedin':
-            // LinkedIn with longer responses (3-6h)
-            responseTimes = [3.2, 3.8, 4.5, 5.0, 5.5, 6.2];
-            break;
-          default: // other
-            // Other channels with a mix (1-3h)
-            responseTimes = [1.1, 1.5, 1.9, 2.3, 2.8];
-        }
-        
-        // Get the needed count
-        const neededCount = minCount - pgResponseData[channel].length;
-        
-        // Generate nicely distributed dates
-        const dateRange = period.start - period.end;
-        const today = new Date();
-        
-        for (let i = 0; i < neededCount; i++) {
-          // Space dates evenly through the range
-          const daysAgo = period.end + (dateRange * (i / neededCount));
-          const date = new Date(today);
-          date.setDate(today.getDate() - Math.round(daysAgo));
-          
-          const formattedDate = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${date.getFullYear()}`;
-          
+        for (let i = 0; i < count; i++) {
           // Add randomness to response times but keep the distribution characteristics
           const baseTime = responseTimes[i % responseTimes.length];
           // Adjust response time with a variation based on PG name hash
-          const variation = ((pgNameHash + i) % 20) / 100; // ±10% variation
+          const variation = ((pgNameHash + week + i) % 20) / 100; // ±10% variation
           const responseTime = Math.round((baseTime * (1 + variation - 0.1)) * 10) / 10;
           
-          defaultData.push({
-            date: formattedDate,
+          data.push({
+            week: week,
+            weekLabel: `Week ${week}`,
+            date: `Week ${week}`,
             responseTime: responseTime,
             pgName: pgName,
             persona: ['CMO', 'CEO', 'Director', 'Operations'][Math.floor(Math.random() * 4)],
@@ -836,17 +816,17 @@ const StageDetailView = ({ stage, onClose }) => {
             region: ['NE', 'SE', 'MW', 'SW', 'W'][Math.floor(Math.random() * 5)]
           });
         }
-        
-        pgResponseData[channel] = [...pgResponseData[channel], ...defaultData];
       }
-      return pgResponseData[channel];
+      
+      return data;
     };
     
-    // Ensure minimum data points for each channel
-    pgResponseData.phone = ensureMinimumData('phone', 8);
-    pgResponseData.email = ensureMinimumData('email', 8);
-    pgResponseData.linkedin = ensureMinimumData('linkedin', 6);
-    pgResponseData.other = ensureMinimumData('other', 5);
+    // Set response counts for each channel across the 5 weeks
+    // Format: [Week1, Week2, Week3, Week4, Week5]
+    pgResponseData.phone = generateWeeklyData('phone', [2, 3, 2, 2, 1]);
+    pgResponseData.email = generateWeeklyData('email', [2, 2, 3, 2, 1]);
+    pgResponseData.linkedin = generateWeeklyData('linkedin', [1, 2, 1, 1, 1]);
+    pgResponseData.other = generateWeeklyData('other', [1, 1, 1, 1, 1]);
     
     return pgResponseData;
   };
@@ -900,6 +880,20 @@ const StageDetailView = ({ stage, onClose }) => {
     return Math.min(Math.max(position, margin), 100 - margin);
   };
   
+  // Week-based helper function for x-axis positioning
+  const getWeekPositionPercentage = (weekNum) => {
+    // Use 5 weeks (1-5)
+    const totalWeeks = 5;
+    const usableWidth = 80;
+    const margin = (100 - usableWidth) / 2;
+    
+    // Distribute evenly for week positions
+    const step = usableWidth / (totalWeeks - 1);
+    const position = margin + ((weekNum - 1) * step);
+    
+    return position;
+  };
+  
   // Helper function to determine dot color based on response time
   const getDotColor = (responseTime, channel) => {
     const target = targetResponseTimes[channel] || 2;
@@ -943,7 +937,7 @@ const StageDetailView = ({ stage, onClose }) => {
       persona: item.persona,
       responseTime: formatResponseTime(item.responseTime),
       outcome: item.outcome,
-      date: item.date,
+      date: item.weekLabel,
       channel: channel.charAt(0).toUpperCase() + channel.slice(1) // Capitalize channel name
     });
     setActiveTooltip({ channel, index });
@@ -2051,6 +2045,24 @@ const StageDetailView = ({ stage, onClose }) => {
                       </div>
                       
                       <div className="channels-container">
+                        {/* Week labels on x-axis */}
+                        <div className="week-labels">
+                          <div className="week-label" style={{ left: `${getWeekPositionPercentage(1)}%` }}>Week 1</div>
+                          <div className="week-label" style={{ left: `${getWeekPositionPercentage(2)}%` }}>Week 2</div>
+                          <div className="week-label" style={{ left: `${getWeekPositionPercentage(3)}%` }}>Week 3</div>
+                          <div className="week-label" style={{ left: `${getWeekPositionPercentage(4)}%` }}>Week 4</div>
+                          <div className="week-label" style={{ left: `${getWeekPositionPercentage(5)}%` }}>Week 5</div>
+                        </div>
+                        
+                        {/* Week grid lines */}
+                        <div className="week-grid-lines">
+                          <div className="week-grid-line" style={{ left: `${getWeekPositionPercentage(1)}%` }}></div>
+                          <div className="week-grid-line" style={{ left: `${getWeekPositionPercentage(2)}%` }}></div>
+                          <div className="week-grid-line" style={{ left: `${getWeekPositionPercentage(3)}%` }}></div>
+                          <div className="week-grid-line" style={{ left: `${getWeekPositionPercentage(4)}%` }}></div>
+                          <div className="week-grid-line" style={{ left: `${getWeekPositionPercentage(5)}%` }}></div>
+                        </div>
+                        
                         {/* Phone channel */}
                         <div className="channel-column">
                           <div className="channel-icon phone-icon">
@@ -2066,7 +2078,7 @@ const StageDetailView = ({ stage, onClose }) => {
                                 className="data-dot"
                                 style={{
                                   bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                  left: `${getDatePositionPercentage(item.date, index, responseData.phone.length)}%`,
+                                  left: `${getWeekPositionPercentage(item.week)}%`,
                                   backgroundColor: getDotColor(item.responseTime, 'phone')
                                 }}
                                 onMouseEnter={(e) => handleDotMouseEnter(e, 'phone', index, responseData)}
@@ -2096,7 +2108,7 @@ const StageDetailView = ({ stage, onClose }) => {
                                 className="data-dot"
                                 style={{
                                   bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                  left: `${getDatePositionPercentage(item.date, index, responseData.email.length)}%`,
+                                  left: `${getWeekPositionPercentage(item.week)}%`,
                                   backgroundColor: getDotColor(item.responseTime, 'email')
                                 }}
                                 onMouseEnter={(e) => handleDotMouseEnter(e, 'email', index, responseData)}
@@ -2126,7 +2138,7 @@ const StageDetailView = ({ stage, onClose }) => {
                                 className="data-dot"
                                 style={{
                                   bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                  left: `${getDatePositionPercentage(item.date, index, responseData.linkedin.length)}%`,
+                                  left: `${getWeekPositionPercentage(item.week)}%`,
                                   backgroundColor: getDotColor(item.responseTime, 'linkedin')
                                 }}
                                 onMouseEnter={(e) => handleDotMouseEnter(e, 'linkedin', index, responseData)}
@@ -2156,7 +2168,7 @@ const StageDetailView = ({ stage, onClose }) => {
                                 className="data-dot"
                                 style={{
                                   bottom: `${getResponseTimePosition(item.responseTime)}%`,
-                                  left: `${getDatePositionPercentage(item.date, index, responseData.other.length)}%`,
+                                  left: `${getWeekPositionPercentage(item.week)}%`,
                                   backgroundColor: getDotColor(item.responseTime, 'other')
                                 }}
                                 onMouseEnter={(e) => handleDotMouseEnter(e, 'other', index, responseData)}
