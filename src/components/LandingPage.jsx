@@ -47,8 +47,7 @@ const ResponseVelocityPreview = () => {
             <div className="channel-icon email-icon">
               <FiMail />
             </div>
-            <div className="channel-info">
-              <div className="channel-name">Email</div>
+             <div className="channel-name">Email</div>
               <div className="channel-value">25</div>
             </div>
             <div className="channel-chart">
@@ -78,7 +77,8 @@ const ResponseVelocityPreview = () => {
             </div>
             <div className="channel-chart">
               <div className="target-line" style={{ top: '46%', backgroundColor: targetLineColor }}>
-                <span className="target-label">3h</span>
+            <div className="channel-info">
+                 <span className="target-label">3h</span>
               </div>
               <div className="average-line" style={{ top: '50%', backgroundColor: averageLineColor }}>
                 <span className="average-label">3.5h</span>
@@ -218,74 +218,77 @@ const AcquisitionGraph = () => {
   const [timeFilter, setTimeFilter] = useState('quarterly');
   const [verticalFilter, setVerticalFilter] = useState('all');
   
-  // Sample data for the graph - PG acquisition data
-  const milestones = [
-    { date: "Q1", label: "Pilot campaign started", position: 1 },
-    { date: "Q3", label: "New region expansion", position: 3 }
-  ];
+  // Target data - representing the target number of PGs to acquire
+  // Based on the 77.4% completion with 26 PGs remaining, total target is ~115
+  const targetTotal = 115;
+  const targetData = {
+    weekly: [20, 20, 20, 20, 20, 20],
+    monthly: [19, 19, 19, 19, 19, 20],
+    quarterly: [29, 29, 29, 28]
+  };
   
   // Chart data - representing acquired PGs over time
   const chartData = {
     weekly: {
       all: [
-        { name: 'W1', value: 2, pv: 20 },
-        { name: 'W2', value: 3, pv: 18 },
-        { name: 'W3', value: 4, pv: 16 },
-        { name: 'W4', value: 5, pv: 14 },
-        { name: 'W5', value: 4, pv: 16 },
-        { name: 'W6', value: 6, pv: 12 }
+        { name: 'W1', value: 2, pv: 20, target: targetData.weekly[0] },
+        { name: 'W2', value: 3, pv: 18, target: targetData.weekly[1] },
+        { name: 'W3', value: 4, pv: 16, target: targetData.weekly[2] },
+        { name: 'W4', value: 5, pv: 14, target: targetData.weekly[3] },
+        { name: 'W5', value: 4, pv: 16, target: targetData.weekly[4] },
+        { name: 'W6', value: 6, pv: 12, target: targetData.weekly[5] }
       ],
       chc: [
-        { name: 'W1', value: 1, pv: 20 },
-        { name: 'W2', value: 2, pv: 18 },
-        { name: 'W3', value: 3, pv: 16 },
-        { name: 'W4', value: 3, pv: 14 },
-        { name: 'W5', value: 2, pv: 16 },
-        { name: 'W6', value: 4, pv: 12 }
+        { name: 'W1', value: 1, pv: 20, target: targetData.weekly[0] },
+        { name: 'W2', value: 2, pv: 18, target: targetData.weekly[1] },
+        { name: 'W3', value: 3, pv: 16, target: targetData.weekly[2] },
+        { name: 'W4', value: 3, pv: 14, target: targetData.weekly[3] },
+        { name: 'W5', value: 2, pv: 16, target: targetData.weekly[4] },
+        { name: 'W6', value: 4, pv: 12, target: targetData.weekly[5] }
       ]
     },
     monthly: {
       all: [
-        { name: 'Jan', value: 4, pv: 20 },
-        { name: 'Feb', value: 5, pv: 18 },
-        { name: 'Mar', value: 7, pv: 16 },
-        { name: 'Apr', value: 8, pv: 14 },
-        { name: 'May', value: 10, pv: 12 },
-        { name: 'Jun', value: 12, pv: 10 }
+        { name: 'Jan', value: 4, pv: 20, target: targetData.monthly[0] },
+        { name: 'Feb', value: 5, pv: 18, target: targetData.monthly[1] },
+        { name: 'Mar', value: 7, pv: 16, target: targetData.monthly[2] },
+        { name: 'Apr', value: 8, pv: 14, target: targetData.monthly[3] },
+        { name: 'May', value: 10, pv: 12, target: targetData.monthly[4] },
+        { name: 'Jun', value: 12, pv: 10, target: targetData.monthly[5] }
       ],
       chc: [
-        { name: 'Jan', value: 3, pv: 20 },
-        { name: 'Feb', value: 4, pv: 18 },
-        { name: 'Mar', value: 5, pv: 16 },
-        { name: 'Apr', value: 6, pv: 14 },
-        { name: 'May', value: 7, pv: 12 },
-        { name: 'Jun', value: 8, pv: 10 }
+        { name: 'Jan', value: 3, pv: 20, target: targetData.monthly[0] },
+        { name: 'Feb', value: 4, pv: 18, target: targetData.monthly[1] },
+        { name: 'Mar', value: 5, pv: 16, target: targetData.monthly[2] },
+        { name: 'Apr', value: 6, pv: 14, target: targetData.monthly[3] },
+        { name: 'May', value: 7, pv: 12, target: targetData.monthly[4] },
+        { name: 'Jun', value: 8, pv: 10, target: targetData.monthly[5] }
       ]
     },
     quarterly: {
       all: [
-        { name: 'Q1', value: 12, pv: 20 },
-        { name: 'Q2', value: 16, pv: 16 },
-        { name: 'Q3', value: 19, pv: 12 },
-        { name: 'Q4', value: 23, pv: 8 }
+        { name: 'Q1', value: 12, pv: 20, target: targetData.quarterly[0] },
+        { name: 'Q2', value: 16, pv: 16, target: targetData.quarterly[1] },
+        { name: 'Q3', value: 19, pv: 12, target: targetData.quarterly[2] },
+        { name: 'Q4', value: 23, pv: 8, target: targetData.quarterly[3] }
       ],
       chc: [
-        { name: 'Q1', value: 8, pv: 20 },
-        { name: 'Q2', value: 10, pv: 16 },
-        { name: 'Q3', value: 12, pv: 12 },
-        { name: 'Q4', value: 15, pv: 8 }
+        { name: 'Q1', value: 8, pv: 20, target: targetData.quarterly[0] },
+        { name: 'Q2', value: 10, pv: 16, target: targetData.quarterly[1] },
+        { name: 'Q3', value: 12, pv: 12, target: targetData.quarterly[2] },
+        { name: 'Q4', value: 15, pv: 8, target: targetData.quarterly[3] }
       ],
       primary: [
-        { name: 'Q1', value: 3, pv: 20 },
-        { name: 'Q2', value: 5, pv: 16 },
-        { name: 'Q3', value: 6, pv: 12 },
-        { name: 'Q4', value: 7, pv: 8 }
+        { name: 'Q1', value: 3, pv: 20, target: targetData.quarterly[0] },
+        { name: 'Q2', value: 5, pv: 16, target: targetData.quarterly[1] },
+        { name: 'Q3', value: 6, pv: 12, target: targetData.quarterly[2] },
+        { name: 'Q4', value: 7, pv: 8, target: targetData.quarterly[3] }
       ],
       geriatrics: [
-        { name: 'Q1', value: 1, pv: 20 },
-        { name: 'Q2', value: 1, pv: 16 },
-        { name: 'Q3', value: 1, pv: 12 },
-        { name: 'Q4', value: 1, pv: 8 }
+        { name: 'Q1', value: 1, pv: 20, target: targetData.quarterly[0] },
+        { name: 'Q2', value: 1, pv: 16, target: targetData.quarterly[1] },
+        { name: 'Q3', value: 1, pv: 12, target: targetData.quarterly[2] },
+        { name: 'Q4', value: 1, pv: 8, target: targetData.quarterly[3] }
       ]
     }
   };
@@ -303,14 +306,12 @@ const AcquisitionGraph = () => {
         <div className="recharts-custom-tooltip">
           <p className="tooltip-label">{`${label}`}</p>
           <p className="tooltip-value">{`Acquired PGs: ${payload[0].value}`}</p>
+          <p className="tooltip-value">{`Target PGs: ${payload[1].value}`}</p>
         </div>
       );
     }
     return null;
   };
-  
-  // Find milestone data for current timeFilter
-  const currentMilestones = timeFilter === 'quarterly' ? milestones : [];
   
   return (
     <div className="acquisition-graph-container">
@@ -418,28 +419,22 @@ const AcquisitionGraph = () => {
               }}
             />
             
-            {/* Milestone reference lines */}
-            {currentMilestones.map((milestone, index) => (
-              <ReferenceLine 
-                key={`milestone-${index}`}
-                x={milestone.date} 
-                stroke="var(--color-warning)"
-                strokeDasharray="3 3"
-                label={{ 
-                  value: milestone.label,
-                  position: 'insideTopRight',
-                  fill: '#f59e0b',
-                  fontSize: 10
-                }}
-              />
-            ))}
+            {/* Target line */}
+            <Line 
+              type="monotone" 
+              dataKey="target" 
+              stroke="var(--color-danger)"
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              dot={false}
+            />
           </ComposedChart>
         </ResponsiveContainer>
         
         <div className="milestone-legend">
           <div className="legend-item">
-            <span className="legend-color" style={{ backgroundColor: "var(--color-warning)" }}></span>
-            <span className="legend-text">Milestone</span>
+            <span className="legend-color" style={{ backgroundColor: "var(--color-danger)" }}></span>
+            <span className="legend-text">Target PGs</span>
           </div>
           <div className="legend-item">
             <span className="legend-color" style={{ backgroundColor: "var(--color-primary)" }}></span>
@@ -522,8 +517,8 @@ const LandingPage = ({ onNavigate }) => {
         
         <div className="section-tabs">
           <div className="section-tab active">All Regions</div>
-          <div className="section-tab">Metropolitan</div>
-          <div className="section-tab">Micropolitan</div>
+          <div className="section-tab">Virgin</div>
+          <div className="section-tab">Non Virgin</div>
         </div>
         
         <div className="usa-stat-areas">
@@ -598,7 +593,7 @@ const LandingPage = ({ onNavigate }) => {
           <div className="stat-area-item">
             <div className="stat-area-header">
               <div className="stat-area-title">
-                <h4>Metropolitan Areas</h4>
+                <h4>Virgin Areas</h4>
                 <div className="stat-area-badge">384 Areas</div>
               </div>
               <div className="stat-area-value-wrapper">
@@ -615,7 +610,7 @@ const LandingPage = ({ onNavigate }) => {
           <div className="stat-area-item">
             <div className="stat-area-header">
               <div className="stat-area-title">
-                <h4>Micropolitan Areas</h4>
+                <h4>Non Virgin Areas</h4>
                 <div className="stat-area-badge">543 Areas</div>
               </div>
               <div className="stat-area-value-wrapper">
@@ -642,24 +637,6 @@ const LandingPage = ({ onNavigate }) => {
             </div>
           </div>
           
-          <div className="dashboard-metrics-summary">
-            <div className="metric-summary-item">
-              <div className="metric-summary-value">89</div>
-              <div className="metric-summary-label">PGs in Pipeline</div>
-              <div className="metric-trend positive">+12.6%</div>
-            </div>
-            <div className="metric-summary-item">
-              <div className="metric-summary-value">12</div>
-              <div className="metric-summary-label">New This Month</div>
-              <div className="metric-trend positive">+4 vs prev</div>
-            </div>
-            <div className="metric-summary-item">
-              <div className="metric-summary-value">4.2</div>
-              <div className="metric-summary-label">Avg. Response (hrs)</div>
-              <div className="metric-trend negative">+0.5 hrs</div>
-            </div>
-          </div>
-          
           <div className="dashboard-preview">
             <div className="funnel-preview">
               <WAVFunnelPreview />
@@ -669,17 +646,31 @@ const LandingPage = ({ onNavigate }) => {
             </div>
           </div>
           
-          <div className="dashboard-footer">
-            <div className="dashboard-pill">
-              <div className="pill-item">
-                <span className="pill-label">Target Progress:</span>
-                <span className="pill-value">77.4%</span>
-              </div>
-              <div className="pill-item">
-                <span className="pill-label">Remaining:</span>
-                <span className="pill-value">26 PGs</span>
-              </div>
+          <div className="dashboard-pill">
+            <div className="pill-item">
+              <span className="pill-label">Target Progress:</span>
+              <span className="pill-value">77.4%</span>
             </div>
+            <div className="pill-item">
+              <span className="pill-label">Remaining:</span>
+              <span className="pill-value">26 PGs</span>
+            </div>
+          </div>
+          
+          <div className="dashboard-metrics-summary">
+            <div className="metric-summary-item">
+              <div className="metric-summary-value">89</div>
+              <div className="metric-summary-label">PGs in Funnel</div>
+              <div className="metric-trend positive">+12.6%</div>
+            </div>
+            <div className="metric-summary-item">
+              <div className="metric-summary-value">12</div>
+              <div className="metric-summary-label">New This Month</div>
+              <div className="metric-trend positive">+4 vs prev</div>
+            </div>
+          </div>
+          
+          <div className="dashboard-footer">
             <div className="view-details" onClick={() => onNavigate('pgdashboard')}>
               View Dashboard <FiArrowRight />
             </div>

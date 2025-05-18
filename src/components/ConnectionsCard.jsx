@@ -1,9 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import './Card.css';
 
 const ConnectionsCard = ({ data }) => {
-  const [activeTab, setActiveTab] = useState('promoters');
-
   // Process raw data into the required format
   const processedData = useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) {
@@ -12,7 +10,7 @@ const ConnectionsCard = ({ data }) => {
         promoters: 0,
         neutral: 0,
         blockers: 0,
-        successRates: {
+        conversionRates: {
           promoters: '0%',
           neutral: '0%',
           blockers: '0%',
@@ -46,22 +44,22 @@ const ConnectionsCard = ({ data }) => {
       }
     );
     
-    // Calculate success rates
-    const calculateSuccessRate = (successes, attempts) => {
+    // Calculate conversion rates
+    const calculateConversionRate = (successes, attempts) => {
       if (!attempts) return '0%';
       return `${Math.round((successes / attempts) * 100)}%`;
     };
 
-    const successRates = {
-      promoters: calculateSuccessRate(stats.promoters.successes, stats.promoters.attempts),
-      neutral: calculateSuccessRate(stats.neutral.successes, stats.neutral.attempts),
-      blockers: calculateSuccessRate(stats.blockers.successes, stats.blockers.attempts)
+    const conversionRates = {
+      promoters: calculateConversionRate(stats.promoters.successes, stats.promoters.attempts),
+      neutral: calculateConversionRate(stats.neutral.successes, stats.neutral.attempts),
+      blockers: calculateConversionRate(stats.blockers.successes, stats.blockers.attempts)
     };
 
-    // Calculate total success rate
+    // Calculate total conversion rate
     const totalSuccesses = Object.values(stats).reduce((sum, stat) => sum + stat.successes, 0);
     const totalAttempts = Object.values(stats).reduce((sum, stat) => sum + stat.attempts, 0);
-    successRates.overall = calculateSuccessRate(totalSuccesses, totalAttempts);
+    conversionRates.overall = calculateConversionRate(totalSuccesses, totalAttempts);
 
     // Calculate totals for each category
     const counts = {
@@ -74,7 +72,7 @@ const ConnectionsCard = ({ data }) => {
     return {
       total,
       ...counts,
-      successRates
+      conversionRates
     };
   }, [data]);
 
@@ -85,49 +83,38 @@ const ConnectionsCard = ({ data }) => {
         <div className="card-breakdown">
           <div className="breakdown-item">
             <div className="breakdown-label promoter">Promoters</div>
-            <div className="breakdown-value">{processedData.promoters}</div>
+            <div className="breakdown-value">
+              {processedData.promoters} 
+              <span className="conversion-rate promoter">
+                {" "}({processedData.conversionRates.promoters})
+              </span>
+            </div>
           </div>
           <div className="breakdown-item">
             <div className="breakdown-label neutral">Neutral</div>
-            <div className="breakdown-value">{processedData.neutral}</div>
+            <div className="breakdown-value">
+              {processedData.neutral}
+              <span className="conversion-rate neutral">
+                {" "}({processedData.conversionRates.neutral})
+              </span>
+            </div>
           </div>
           <div className="breakdown-item">
             <div className="breakdown-label blockers">Blockers</div>
-            <div className="breakdown-value">{processedData.blockers}</div>
+            <div className="breakdown-value">
+              {processedData.blockers}
+              <span className="conversion-rate blockers">
+                {" "}({processedData.conversionRates.blockers})
+              </span>
+            </div>
           </div>
         </div>
       </div>
       
       <div className="metrics-section">
-        <div className="tab-row">
-          <div 
-            className={`tab ${activeTab === 'promoters' ? 'active promoter' : ''}`}
-            onClick={() => setActiveTab('promoters')}
-          >
-            Promoters
-          </div>
-          <div 
-            className={`tab ${activeTab === 'neutral' ? 'active neutral' : ''}`}
-            onClick={() => setActiveTab('neutral')}
-          >
-            Neutral
-          </div>
-          <div 
-            className={`tab ${activeTab === 'blockers' ? 'active blockers' : ''}`}
-            onClick={() => setActiveTab('blockers')}
-          >
-            Blockers
-          </div>
-        </div>
-        
         <div className="success-rate-container">
-          <div className="success-rate-label">Success Rate:</div>
-          <div className="success-rate-value">{activeTab === 'promoters' 
-            ? processedData.successRates.promoters
-            : activeTab === 'neutral' 
-            ? processedData.successRates.neutral
-            : processedData.successRates.blockers}
-          </div>
+          <div className="success-rate-label">Conversion Rate:</div>
+          <div className="success-rate-value">{processedData.conversionRates.overall}</div>
         </div>
       </div>
     </div>

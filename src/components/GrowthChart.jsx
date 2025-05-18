@@ -1,6 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Label } from 'recharts';
 import './GrowthChart.css';
+
+// Custom tooltip component to show more detailed information
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip">
+        <p className="tooltip-label">{`Month: ${label}`}</p>
+        {payload.map((entry, index) => (
+          <div key={index} className="tooltip-item">
+            <div className="tooltip-color-box" style={{ backgroundColor: entry.stroke }}></div>
+            <p className="tooltip-stage">{entry.name}: <strong>{entry.value}</strong> PGs</p>
+          </div>
+        ))}
+        <p className="tooltip-hint">Values represent PG count at each KPI stage</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const GrowthChart = ({ data }) => {
   const [selectedStage, setSelectedStage] = useState('all');
@@ -336,57 +355,47 @@ const GrowthChart = ({ data }) => {
         </div>
       </div>
       
-      <div className="stage-legend">
-        <div className="legend-item">
-          <span className="legend-color stage-1"></span>
-          <span>Stage 1</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color stage-2"></span>
-          <span>Stage 2</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color stage-3"></span>
-          <span>Stage 3</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color stage-4"></span>
-          <span>Stage 4</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-color stage-5"></span>
-          <span>Stage 5</span>
-        </div>
-      </div>
-
-      <div className="chart-area">
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="chart-wrapper">
+        <ResponsiveContainer width="100%" height={400}>
           <LineChart
             data={filteredData}
-            margin={{ top: 10, right: 20, left: 20, bottom: 5 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
           >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis 
               dataKey="name" 
-              axisLine={false}
-              tickLine={false}
+              axisLine={{ stroke: '#cbd5e1' }}
               tick={{ fill: '#64748b', fontSize: 12 }}
-            />
+              tickLine={{ stroke: '#cbd5e1' }}
+              padding={{ left: 10, right: 10 }}
+            >
+              <Label 
+                value="Time Period" 
+                position="bottom" 
+                offset={20} 
+                style={{ fontSize: 14, fill: '#334155' }} 
+              />
+            </XAxis>
             <YAxis 
-              axisLine={false}
-              tickLine={false}
+              axisLine={{ stroke: '#cbd5e1' }}
               tick={{ fill: '#64748b', fontSize: 12 }}
-              domain={[0, 'dataMax + 100']}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'white', 
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-              }}
-              labelStyle={{ fontWeight: 600, color: '#334155' }}
-              itemStyle={{ padding: '2px 0' }}
+              tickLine={{ stroke: '#cbd5e1' }}
+              width={60}
+            >
+              <Label 
+                value="PG Count" 
+                position="left" 
+                angle={-90} 
+                offset={0} 
+                style={{ textAnchor: 'middle', fontSize: 14, fill: '#334155' }} 
+              />
+            </YAxis>
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              align="center" 
+              verticalAlign="bottom"
+              wrapperStyle={{ paddingTop: '20px' }}
+              formatter={(value) => <span className="legend-label">{value}</span>}
             />
             <Line 
               type="monotone" 
@@ -455,6 +464,15 @@ const GrowthChart = ({ data }) => {
             />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+      
+      <div className="chart-info-box">
+        <div className="info-header">About this chart</div>
+        <p className="info-content">
+          This graph shows the number of paying guests (PGs) at each KPI stage over time.
+          Higher stages represent more advanced acquisition stages, from initial outreach (Stage 1)
+          to fully onboarded PGs with ≥100 active patients (Stage 5).
+        </p>
       </div>
     </div>
   );

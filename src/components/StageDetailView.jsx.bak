@@ -732,7 +732,7 @@ const StageDetailView = ({ stage, onClose }) => {
   // Add these new state variables
   const [selectedStageFilter, setSelectedStageFilter] = useState('All Stages');
   const [timeDisplayFormat, setTimeDisplayFormat] = useState('Monthly');
-  const [showPGSpecificMetrics, setShowPGSpecificMetrics] = useState(true);
+  const [showPGSpecificMetrics, setShowPGSpecificMetrics] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [tooltipContent, setTooltipContent] = useState(null);
   const [activeTooltip, setActiveTooltip] = useState(null);
@@ -746,6 +746,24 @@ const StageDetailView = ({ stage, onClose }) => {
   // Add a function to handle time display format changes
   const handleTimeDisplayFormatChange = (format) => {
     setTimeDisplayFormat(format);
+  };
+  
+  // Add a function to toggle between aggregate and PG-specific views
+  const toggleMetricsView = () => {
+    setShowPGSpecificMetrics(!showPGSpecificMetrics);
+  };
+  
+  // Get current chart data based on selected time range and view mode
+  const getCurrentChartData = () => {
+    if (selectedPG && showPGSpecificMetrics) {
+      // Return PG-specific metrics
+      const pgId = selectedPG.id;
+      const pgData = mockPGMetricsData[pgId] || defaultPGMetrics;
+      return pgData[selectedTimeRange] || [];
+    }
+    
+    // Return aggregate data (default)
+    return mockKpiData[selectedTimeRange] || [];
   };
   
   // Target response times (in hours) for each channel
@@ -1774,37 +1792,38 @@ const StageDetailView = ({ stage, onClose }) => {
             </div>
             
             {/* Key Tactics Card */}
-            <div className="detail-card key-tactics-card">
+            <div className="detail-card tactics-card">
               <div className="detail-card-header">
                 <div className="detail-card-title">
-                  <span className="detail-icon">✅</span>
+                  <span className="detail-icon">🎯</span>
                   Key Tactics
+                </div>
+              </div>
+              
+              <div className="tactics-stats">
+                <div className="tactic-stat">
+                  <div className="tactic-number">{getPGStats(selectedPG).totalTactics}</div>
+                  <div className="tactic-label">Total Tactics</div>
+                </div>
+                <div className="tactic-stat">
+                  <div className="tactic-number">{getPGStats(selectedPG).completedTactics}</div>
+                  <div className="tactic-label">Completed</div>
+                </div>
+                <div className="tactic-stat">
+                  <div className="tactic-number">{getPGStats(selectedPG).successRate}%</div>
+                  <div className="tactic-label">Success Rate</div>
                 </div>
               </div>
               
               <div className="tactics-list">
                 {keyTactics[selectedPG.id].map((tactic, index) => (
                   <div key={index} className="tactic-item">
-                    <div className={`tactic-status ${tactic.completed ? 'completed' : 'pending'}`}>
-                      {tactic.completed ? <FiCheckCircle /> : <FiClock />}
+                    <div className={`tactic-status ${tactic.completed ? 'completed' : ''}`}>
+                      {tactic.completed ? '✓' : '○'}
                     </div>
-                    <div className="tactic-content">
-                      <div className="tactic-text">{tactic.text}</div>
-                      <div className="tactic-status-text">
-                        {tactic.completed ? "Completed" : "In progress"}
-                      </div>
-                    </div>
-                    <div className="tactic-actions">
-                      <button className="expand-btn">
-                        <FiExternalLink />
-                      </button>
-                    </div>
+                    <div className="tactic-text">{tactic.text}</div>
                   </div>
                 ))}
-                
-                <div className="add-tactic">
-                  <span>+ Add Tactic</span>
-                </div>
               </div>
             </div>
             
@@ -1877,22 +1896,63 @@ const StageDetailView = ({ stage, onClose }) => {
                       <option value="week">Weeks</option>
                     </select>
                   </div>
+                  
+                  <div className="filter-group">
+                    <label>View Mode:</label>
+                    <div className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        id="metrics-toggle" 
+                        checked={showPGSpecificMetrics}
+                        onChange={toggleMetricsView}
+                      />
+                      <label htmlFor="metrics-toggle" className="toggle-label">
+                        <span className="toggle-option">Aggregate</span>
+                        <span className="toggle-slider"></span>
+                        <span className="toggle-option">PG Specific</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="time-format-toggle">
+                  <button 
+                    className={`toggle-button ${timeDisplayFormat === 'Weekly' ? 'active' : ''}`}
+                    onClick={() => handleTimeDisplayFormatChange('Weekly')}
+                  >
+                    Weekly
+                  </button>
+                  <button 
+                    className={`toggle-button ${timeDisplayFormat === 'Monthly' ? 'active' : ''}`}
+                    onClick={() => handleTimeDisplayFormatChange('Monthly')}
+                  >
+                    Monthly
+                  </button>
                 </div>
                 
                 <div className="stage-legend">
-                  {Object.entries(pgMetricsColors).map(([metric, color]) => (
-                    <div key={metric} className="legend-item">
-                      <span className="legend-color" style={{ backgroundColor: color }}></span>
-                      <span>{metric}</span>
-                    </div>
-                  ))}
+                  {showPGSpecificMetrics ? (
+                    Object.entries(pgMetricsColors).map(([metric, color]) => (
+                      <div key={metric} className="legend-item">
+                        <span className="legend-color" style={{ backgroundColor: color }}></span>
+                        <span>{metric}</span>
+                      </div>
+                    ))
+                  ) : (
+                    Object.entries(stageColors).map(([stage, color]) => (
+                      <div key={stage} className="legend-item">
+                        <span className="legend-color" style={{ backgroundColor: color }}></span>
+                        <span>{stage}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
                 
                 <div className="chart-container">
                   <ResponsiveContainer width="100%" height={350}>
                     <LineChart
-                      data={selectedPG ? (mockPGMetricsData[selectedPG.id] || defaultPGMetrics)[selectedTimeRange] || [] : []}
-                      margin={{ top: 10, right: 10, left: 5, bottom: 5 }}
+                      data={getCurrentChartData()}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis 
@@ -1905,9 +1965,8 @@ const StageDetailView = ({ stage, onClose }) => {
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: '#64748b', fontSize: 12 }}
-                        domain={['auto', 'auto']}
-                        allowDataOverflow={false}
-                        padding={{ top: 20, bottom: 20 }}
+                        domain={showPGSpecificMetrics ? [0, 'dataMax + 20'] : [0, 'dataMax + 100']}
+                        ticks={showPGSpecificMetrics ? undefined : [0, 250, 500, 750, 1000]}
                       />
                       <Tooltip 
                         formatter={(value, name) => [`${value}${name === 'TrustScore' ? '/100' : name === 'Engagement' ? ' min' : ''}`, name]}
@@ -1920,18 +1979,44 @@ const StageDetailView = ({ stage, onClose }) => {
                         }}
                       />
                       
-                      {/* PG-specific metrics lines */}
-                      {Object.entries(pgMetricsColors).map(([metric, color]) => (
-                        <Line
-                          key={metric}
-                          type="monotone"
-                          dataKey={metric}
-                          stroke={color}
-                          strokeWidth={2}
-                          dot={{ r: 4, fill: color, stroke: color }}
-                          activeDot={{ r: 6 }}
-                        />
-                      ))}
+                      {showPGSpecificMetrics ? (
+                        // PG-specific metrics lines
+                        Object.entries(pgMetricsColors).map(([metric, color]) => (
+                          <Line
+                            key={metric}
+                            type="monotone"
+                            dataKey={metric}
+                            stroke={color}
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: color, stroke: color }}
+                            activeDot={{ r: 6 }}
+                          />
+                        ))
+                      ) : (
+                        // Aggregate view (stages)
+                        selectedStageFilter === 'All Stages' ? (
+                          Object.entries(stageColors).map(([stage, color]) => (
+                            <Line
+                              key={stage}
+                              type="monotone"
+                              dataKey={stage}
+                              stroke={color}
+                              strokeWidth={2}
+                              dot={{ r: 4, fill: color, stroke: color }}
+                              activeDot={{ r: 6 }}
+                            />
+                          ))
+                        ) : (
+                          <Line
+                            type="monotone"
+                            dataKey={selectedStageFilter}
+                            stroke={stageColors[selectedStageFilter]}
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: stageColors[selectedStageFilter], stroke: stageColors[selectedStageFilter] }}
+                            activeDot={{ r: 6 }}
+                          />
+                        )
+                      )}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -2188,6 +2273,25 @@ const StageDetailView = ({ stage, onClose }) => {
                             <div><span className="tooltip-label">Outcome:</span> {tooltipContent.outcome}</div>
                           </div>
                         )}
+                      </div>
+                      
+                      <div className="response-legend">
+                        <div className="legend-item">
+                          <span className="legend-dot fast"></span>
+                          <span>Fast Response</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-dot medium"></span>
+                          <span>Medium Response</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-dot slow"></span>
+                          <span>Slow Response</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-line"></span>
+                          <span>Target Response Time</span>
+                        </div>
                       </div>
                     </>
                   );

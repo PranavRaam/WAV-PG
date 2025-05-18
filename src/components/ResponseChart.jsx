@@ -1,8 +1,34 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiPhone, FiMail, FiLinkedin, FiMoreHorizontal, FiFilter, FiChevronDown, FiX, FiRefreshCw, FiPieChart, FiBarChart2 } from 'react-icons/fi';
+import { MdPhone, MdEmail, MdMore, MdFilterList, MdKeyboardArrowDown, MdClose, MdRefresh, MdPieChart, MdBarChart } from 'react-icons/md';
+import { FaLinkedin } from 'react-icons/fa';
 import { mockResponseData, mockTrendData, getDateRange, isDateInRange } from './ResponseData';
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, ZAxis, ReferenceLine } from 'recharts';
 import './ResponseChart.css';
+
+// Create dedicated icon components with guaranteed visibility
+const PhoneIcon = () => (
+  <div className="custom-icon phone-icon">
+    <MdPhone size={26} style={{color: '#ffffff', display: 'block'}} />
+  </div>
+);
+
+const EmailIcon = () => (
+  <div className="custom-icon email-icon">
+    <MdEmail size={26} style={{color: '#ffffff', display: 'block'}} />
+  </div>
+);
+
+const LinkedInIcon = () => (
+  <div className="custom-icon linkedin-icon">
+    <FaLinkedin size={26} style={{color: '#ffffff', display: 'block'}} />
+  </div>
+);
+
+const OtherIcon = () => (
+  <div className="custom-icon other-icon">
+    <MdMore size={26} style={{color: '#ffffff', display: 'block'}} />
+  </div>
+);
 
 // Options for filters
 const timeRangeOptions = [
@@ -13,11 +39,19 @@ const timeRangeOptions = [
   { label: 'Custom Range', value: 'custom' }
 ];
 
+// Options for the Outcome filter (removed "Interested" as requested)
 const outcomeOptions = [
   { label: 'All Outcomes', value: 'all' },
-  { label: 'Interested', value: 'Interested' },
   { label: 'Replied', value: 'Replied' },
   { label: 'No Reply', value: 'No Reply' }
+];
+
+// New Time Frame filter options replacing the Region filter
+const timeFrameOptions = [
+  { label: 'All Time Frames', value: 'all' },
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Quarterly', value: 'quarterly' }
 ];
 
 const regionOptions = [
@@ -38,10 +72,10 @@ const targetResponseTimes = {
 };
 
 const channelIcons = {
-  phone: <FiPhone className="channel-icon" />,
-  email: <FiMail className="channel-icon" />,
-  linkedin: <FiLinkedin className="channel-icon" />,
-  other: <FiMoreHorizontal className="channel-icon" />
+  phone: <PhoneIcon />,
+  email: <EmailIcon />,
+  linkedin: <LinkedInIcon />,
+  other: <OtherIcon />
 };
 
 const channelLabels = {
@@ -71,7 +105,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [timeRange, setTimeRange] = useState('7d');
   const [selectedOutcome, setSelectedOutcome] = useState('all');
-  const [selectedRegion, setSelectedRegion] = useState('all');
+  const [selectedTimeFrame, setSelectedTimeFrame] = useState('all');
   const [originalData] = useState(mockResponseData); // Keep original data for filtering
   const [filteredData, setFilteredData] = useState(mockResponseData);
   const [dateRange, setDateRange] = useState(getDateRange('7d'));
@@ -85,13 +119,13 @@ const ResponseChart = ({ searchQuery = '' }) => {
   // State for controlling dropdown visibility
   const [showTimeRangeDropdown, setShowTimeRangeDropdown] = useState(false);
   const [showOutcomeDropdown, setShowOutcomeDropdown] = useState(false);
-  const [showRegionDropdown, setShowRegionDropdown] = useState(false);
+  const [showTimeFrameDropdown, setShowTimeFrameDropdown] = useState(false);
 
   // Function to close all dropdowns
   const closeAllDropdowns = () => {
     setShowTimeRangeDropdown(false);
     setShowOutcomeDropdown(false);
-    setShowRegionDropdown(false);
+    setShowTimeFrameDropdown(false);
     setShowDatePicker(false);
   };
 
@@ -107,8 +141,8 @@ const ResponseChart = ({ searchQuery = '' }) => {
       case 'outcome':
         setShowOutcomeDropdown(!showOutcomeDropdown);
         break;
-      case 'region':
-        setShowRegionDropdown(!showRegionDropdown);
+      case 'timeFrame':
+        setShowTimeFrameDropdown(!showTimeFrameDropdown);
         break;
       default:
         break;
@@ -146,7 +180,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
     let count = 0;
     if (timeRange !== '7d') count++;
     if (selectedOutcome !== 'all') count++;
-    if (selectedRegion !== 'all') count++;
+    if (selectedTimeFrame !== 'all') count++;
     if (searchQuery.trim() !== '') count++;
     setActiveFilters(count);
 
@@ -166,7 +200,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
     
     return () => clearTimeout(timerId);
     
-  }, [timeRange, selectedOutcome, selectedRegion, customStartDate, customEndDate, originalData, searchQuery]);
+  }, [timeRange, selectedOutcome, selectedTimeFrame, customStartDate, customEndDate, originalData, searchQuery]);
 
   // Helper function to filter data for a specific channel
   const filterChannelData = (channelData) => {
@@ -177,8 +211,22 @@ const ResponseChart = ({ searchQuery = '' }) => {
       // Filter by outcome
       const matchesOutcome = selectedOutcome === 'all' || item.outcome === selectedOutcome;
       
-      // Filter by region
-      const matchesRegion = selectedRegion === 'all' || item.region === selectedRegion;
+      // Determine timeFrame based on date (mock implementation)
+      let itemTimeFrame = 'weekly';
+      const itemDate = new Date(item.date);
+      const currentDate = new Date();
+      const daysDiff = Math.floor((currentDate - itemDate) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff <= 7) {
+        itemTimeFrame = 'weekly';
+      } else if (daysDiff <= 30) {
+        itemTimeFrame = 'monthly';
+      } else {
+        itemTimeFrame = 'quarterly';
+      }
+      
+      // Filter by time frame
+      const matchesTimeFrame = selectedTimeFrame === 'all' || itemTimeFrame === selectedTimeFrame;
       
       // Filter by search query (division, statistical area, region, or PG name)
       const matchesSearch = !searchQuery.trim() || 
@@ -187,7 +235,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
         (item.region && item.region.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.pgName && item.pgName.toLowerCase().includes(searchQuery.toLowerCase()));
       
-      return isInTimeRange && matchesOutcome && matchesRegion && matchesSearch;
+      return isInTimeRange && matchesOutcome && matchesTimeFrame && matchesSearch;
     });
   };
 
@@ -199,6 +247,16 @@ const ResponseChart = ({ searchQuery = '' }) => {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = Math.round(minutes % 60);
     return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+  };
+
+  // Original helper function for hours (used for pie chart statistics)
+  const formatResponseTime = (hours) => {
+    if (hours < 1) {
+      return `${Math.round(hours * 60)}m`;
+    }
+    const wholeHours = Math.floor(hours);
+    const minutes = Math.round((hours - wholeHours) * 60);
+    return minutes > 0 ? `${wholeHours}h ${minutes}m` : `${wholeHours}h`;
   };
 
   // Calculate response time categories for pie charts
@@ -242,94 +300,150 @@ const ResponseChart = ({ searchQuery = '' }) => {
     };
   }, [filteredData]);
 
-  // Prepare data for scatter plot with minutes instead of hours
+  // Calculate date range for x-axis domain and group into weeks
+  const xAxisDomain = useMemo(() => {
+    if (!filteredData || Object.values(filteredData).every(data => !data || !data.length)) {
+      // Default range if no data
+      const now = new Date();
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return [sevenDaysAgo.getTime(), now.getTime()];
+    }
+    
+    // Take date range directly from dateRange when possible
+    if (dateRange && dateRange.start && dateRange.end) {
+      return [dateRange.start.getTime(), dateRange.end.getTime()];
+    }
+    
+    // Get all dates from the filtered data
+    const dates = [];
+    Object.values(filteredData).forEach(channel => {
+      if (channel && channel.length) {
+        channel.forEach(item => {
+          if (item.date) {
+            dates.push(new Date(item.date).getTime());
+          }
+        });
+      }
+    });
+    
+    if (!dates.length) {
+      const now = new Date();
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return [sevenDaysAgo.getTime(), now.getTime()];
+    }
+    
+    let minDate = Math.min(...dates);
+    let maxDate = Math.max(...dates);
+    
+    // Add padding to the range
+    const padding = 24 * 60 * 60 * 1000; // 1 day padding
+    minDate -= padding;
+    maxDate += padding;
+    
+    return [minDate, maxDate];
+  }, [filteredData, dateRange]);
+  
+  // Generate custom ticks for weeks
+  const weeklyTicks = useMemo(() => {
+    const startDate = new Date(xAxisDomain[0]);
+    const endDate = new Date(xAxisDomain[1]);
+    
+    const ticks = [];
+    let currentDate = new Date(startDate);
+    
+    // Generate a tick for each week
+    while (currentDate <= endDate) {
+      ticks.push(currentDate.getTime());
+      // Move to next week
+      currentDate.setDate(currentDate.getDate() + 7);
+    }
+    
+    return ticks;
+  }, [xAxisDomain]);
+  
+  // Format day of week and date
+  const formatDayOfWeek = (timestamp) => {
+    const date = new Date(timestamp);
+    // Format as MM/DD/YY
+    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear().toString().slice(2)}`;
+  };
+
+  // Convert mock response data into scatter plot format
   const scatterData = useMemo(() => {
-    // Group all data in a single array but with proper formatting for timeline view
-    const allData = [];
+    const result = [];
+    // Get the date range for the x-axis
+    const startDate = dateRange.start;
+    const endDate = dateRange.end;
     
-    // Add phone data points
-    filteredData.phone.forEach((item) => {
-      // Convert response time from hours to minutes
-      const responseTimeMinutes = item.responseTime * 60;
-      allData.push({
-        x: new Date(item.date).getTime(), // Use actual date for x-axis
-        y: responseTimeMinutes,
-        z: 100, // Size value for the point
-        name: 'Phone',
-        pgName: item.pgName || 'Unknown PG',
-        persona: item.persona || 'Unknown',
-        outcome: item.outcome || 'Unknown',
-        region: item.region || 'Unknown',
-        date: item.date,
-        responseTime: responseTimeMinutes,
-        responseTimeFormatted: formatResponseTimeMinutes(responseTimeMinutes),
-        target: targetResponseTimes.phone,
-        channel: 'phone'
+    // Use fixed dates from the image for the x-axis
+    const fixedDates = [
+      "05/20/25",
+      "05/27/25",
+      "06/03/25",
+      "06/10/25",
+      "06/17/25",
+      "06/24/25"
+    ];
+    
+    // Calculate dates from the strings
+    const datePoints = fixedDates.map(dateStr => {
+      const [month, day, year] = dateStr.split('/');
+      return new Date(`20${year}`, month - 1, day);
+    });
+    
+    // Reduce the number of data points for each channel
+    // This will make the visualization cleaner
+    const maxPointsPerChannel = 8; // Limited number of points
+    
+    // Process each channel
+    Object.keys(filteredData).forEach(channel => {
+      let channelData = filteredData[channel];
+      if (!channelData || !channelData.length) return;
+      
+      // Take a subset of the data to reduce density
+      if (channelData.length > maxPointsPerChannel) {
+        const step = Math.floor(channelData.length / maxPointsPerChannel);
+        channelData = channelData.filter((_, index) => index % step === 0).slice(0, maxPointsPerChannel);
+      }
+      
+      // For each item in the channel data
+      channelData.forEach((item, index) => {
+        // Position the data point on one of the fixed dates
+        const dateIndex = index % datePoints.length;
+        const timestamp = new Date(datePoints[dateIndex]);
+        
+        // Convert hours to minutes for the scatter plot
+        const responseTimeMinutes = item.responseTime * 60;
+        
+        result.push({
+          x: timestamp.getTime(),
+          y: responseTimeMinutes,
+          z: 40, // Increased dot size for better visibility
+          date: timestamp,
+          responseTime: item.responseTime * 60,
+          responseTimeFormatted: formatResponseTime(item.responseTime),
+          channel: channel,
+          name: channelLabels[channel],
+          pgName: item.pgName || 'Unknown',
+          persona: item.persona || 'Unknown',
+          outcome: item.outcome,
+          region: item.region,
+          division: item.division,
+          statisticalArea: item.statisticalArea,
+          target: targetResponseTimes[channel],
+          performance: responseTimeMinutes <= targetResponseTimes[channel] 
+            ? 'good' 
+            : responseTimeMinutes <= targetResponseTimes[channel] * 1.5 
+              ? 'average' 
+              : 'poor'
+        });
       });
     });
     
-    // Add email data points
-    filteredData.email.forEach((item) => {
-      const responseTimeMinutes = item.responseTime * 60;
-      allData.push({
-        x: new Date(item.date).getTime(),
-        y: responseTimeMinutes,
-        z: 100,
-        name: 'Email',
-        pgName: item.pgName || 'Unknown PG',
-        persona: item.persona || 'Unknown',
-        outcome: item.outcome || 'Unknown',
-        region: item.region || 'Unknown',
-        date: item.date,
-        responseTime: responseTimeMinutes,
-        responseTimeFormatted: formatResponseTimeMinutes(responseTimeMinutes),
-        target: targetResponseTimes.email,
-        channel: 'email'
-      });
-    });
-    
-    // Add linkedin data points
-    filteredData.linkedin.forEach((item) => {
-      const responseTimeMinutes = item.responseTime * 60;
-      allData.push({
-        x: new Date(item.date).getTime(),
-        y: responseTimeMinutes,
-        z: 100,
-        name: 'LinkedIn',
-        pgName: item.pgName || 'Unknown PG',
-        persona: item.persona || 'Unknown',
-        outcome: item.outcome || 'Unknown',
-        region: item.region || 'Unknown',
-        date: item.date,
-        responseTime: responseTimeMinutes,
-        responseTimeFormatted: formatResponseTimeMinutes(responseTimeMinutes),
-        target: targetResponseTimes.linkedin,
-        channel: 'linkedin'
-      });
-    });
-    
-    // Add other data points
-    filteredData.other.forEach((item) => {
-      const responseTimeMinutes = item.responseTime * 60;
-      allData.push({
-        x: new Date(item.date).getTime(),
-        y: responseTimeMinutes,
-        z: 100,
-        name: 'Others',
-        pgName: item.pgName || 'Unknown PG',
-        persona: item.persona || 'Unknown',
-        outcome: item.outcome || 'Unknown',
-        region: item.region || 'Unknown',
-        date: item.date,
-        responseTime: responseTimeMinutes,
-        responseTimeFormatted: formatResponseTimeMinutes(responseTimeMinutes),
-        target: targetResponseTimes.other,
-        channel: 'other'
-      });
-    });
-    
-    return allData;
-  }, [filteredData]);
+    return result;
+  }, [filteredData, dateRange]);
 
   // Group scatter data by channel for separate series display
   const groupedScatterData = useMemo(() => {
@@ -340,57 +454,6 @@ const ResponseChart = ({ searchQuery = '' }) => {
       other: scatterData.filter(item => item.channel === 'other')
     };
   }, [scatterData]);
-
-  // Calculate date range for x-axis domain and group into weeks
-  const xAxisDomain = useMemo(() => {
-    if (!scatterData.length) {
-      // Default range if no data
-      const now = new Date();
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      return [sevenDaysAgo.getTime(), now.getTime()];
-    }
-    
-    const dates = scatterData.map(item => item.x);
-    let minDate = Math.min(...dates);
-    let maxDate = Math.max(...dates);
-    
-    // Add padding to the range
-    const padding = 24 * 60 * 60 * 1000; // 1 day padding
-    minDate -= padding;
-    maxDate += padding;
-    
-    return [minDate, maxDate];
-  }, [scatterData]);
-  
-  // Format day of week and date
-  const formatDayOfWeek = (timestamp) => {
-    const date = new Date(timestamp);
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const dayName = days[date.getDay()];
-    // Format: "Day, MM/DD"
-    return `${dayName}, ${(date.getMonth() + 1)}/${date.getDate()}`;
-  };
-  
-  // Generate custom ticks for days
-  const getDailyTicks = useMemo(() => {
-    if (!scatterData.length) return [];
-    
-    const startDate = new Date(xAxisDomain[0]);
-    const endDate = new Date(xAxisDomain[1]);
-    
-    const ticks = [];
-    let currentDate = new Date(startDate);
-    
-    // Generate a tick for each day
-    while (currentDate <= endDate) {
-      ticks.push(currentDate.getTime());
-      // Move to next day
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return ticks;
-  }, [scatterData, xAxisDomain]);
   
   // Calculate summary statistics
   const channelStats = useMemo(() => {
@@ -452,16 +515,6 @@ const ResponseChart = ({ searchQuery = '' }) => {
     ];
   }, [filteredData]);
 
-  // Original helper function for hours (used for pie chart statistics)
-  const formatResponseTime = (hours) => {
-    if (hours < 1) {
-      return `${Math.round(hours * 60)}m`;
-    }
-    const wholeHours = Math.floor(hours);
-    const minutes = Math.round((hours - wholeHours) * 60);
-    return minutes > 0 ? `${wholeHours}h ${minutes}m` : `${wholeHours}h`;
-  };
-
   // Custom tooltip for pie charts
   const PieTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -494,8 +547,12 @@ const ResponseChart = ({ searchQuery = '' }) => {
       const data = payload[0].payload;
       // Format date for display
       const date = new Date(data.date);
-      const formattedDate = `${date.getMonth() + 1}/${date.getDate()}`;
+      const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear().toString().slice(2)}`;
       const formattedTime = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      
+      // Convert response time from minutes to hours for display
+      const responseHours = (data.responseTime / 60).toFixed(1);
+      const targetHours = (data.target / 60).toFixed(1);
       
       return (
         <div className="custom-tooltip">
@@ -506,11 +563,11 @@ const ResponseChart = ({ searchQuery = '' }) => {
           </p>
           <p className="tooltip-metric">
             <span>Response Time: </span>
-            <span className="tooltip-value">{data.responseTimeFormatted}</span>
+            <span className="tooltip-value">{responseHours}h</span>
           </p>
           <p className="tooltip-metric">
             <span>Target Time: </span>
-            <span className="tooltip-value">{formatResponseTimeMinutes(data.target)}</span>
+            <span className="tooltip-value">{targetHours}h</span>
           </p>
           <p className="tooltip-metric">
             <span>PG: </span>
@@ -536,7 +593,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
   const resetFilters = () => {
     setTimeRange('7d');
     setSelectedOutcome('all');
-    setSelectedRegion('all');
+    setSelectedTimeFrame('all');
     setDateRange(getDateRange('7d'));
   };
 
@@ -550,25 +607,8 @@ const ResponseChart = ({ searchQuery = '' }) => {
 
   // Custom label formatter for the pie chart
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }) => {
-    if (value === 0) return null;
-    
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 0.8;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    
-    return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="#333" 
-        textAnchor={x > cx ? 'start' : 'end'} 
-        dominantBaseline="central"
-        fontSize={12}
-      >
-        {`${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
-      </text>
-    );
+    // Return null for all labels to hide them
+    return null;
   };
   
   // Helper to check if chart has no data
@@ -610,9 +650,10 @@ const ResponseChart = ({ searchQuery = '' }) => {
     setViewMode(viewMode === 'pie' ? 'scatter' : 'pie');
   };
 
-  // Define Y-axis ticks for minutes
+  // Define Y-axis ticks for hours
   const getResponseTimeMinuteTicks = () => {
-    return [0, 30, 60, 120, 180, 240];
+    // Return values to show hours: 1h, 2h, 6h, 12h, 18h
+    return [0, 60, 120, 360, 720, 1080];
   };
 
   // Handle selection of a dropdown item
@@ -630,8 +671,8 @@ const ResponseChart = ({ searchQuery = '' }) => {
         setSelectedOutcome(value);
         closeAllDropdowns();
         break;
-      case 'region':
-        setSelectedRegion(value);
+      case 'timeFrame':
+        setSelectedTimeFrame(value);
         closeAllDropdowns();
         break;
       default:
@@ -648,14 +689,14 @@ const ResponseChart = ({ searchQuery = '' }) => {
             onClick={() => setViewMode('pie')}
             title="Pie Chart View"
           >
-            <FiPieChart size={18} />
+            <MdPieChart size={24} style={{color: viewMode === 'pie' ? '#2563eb' : '#64748b', display: 'block'}} />
           </button>
           <button 
             className={`view-mode-btn ${viewMode === 'scatter' ? 'active' : ''}`}
             onClick={() => setViewMode('scatter')}
             title="Response Time Plot"
           >
-            <FiBarChart2 size={18} />
+            <MdBarChart size={24} style={{color: viewMode === 'scatter' ? '#2563eb' : '#64748b', display: 'block'}} />
           </button>
         </div>
         
@@ -667,7 +708,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
             onClick={() => setShowFilters(!showFilters)}
             title="Show Filters"
           >
-            <FiFilter size={18} />
+            <MdFilterList size={24} style={{color: showFilters ? '#2563eb' : '#64748b', display: 'block'}} />
             {activeFilters > 0 && <span className="filter-count">{activeFilters}</span>}
           </button>
         </div>
@@ -684,7 +725,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
                   onClick={() => toggleDropdown('timeRange')}
                 >
                   {timeRangeOptions.find(o => o.value === timeRange)?.label || 'Select Time Range'}
-                  <FiChevronDown size={16} />
+                  <MdKeyboardArrowDown size={16} />
                 </button>
                 {showTimeRangeDropdown && (
                   <div className="dropdown-menu">
@@ -732,7 +773,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
                   onClick={() => toggleDropdown('outcome')}
                 >
                   {outcomeOptions.find(o => o.value === selectedOutcome)?.label || 'Select Outcome'}
-                  <FiChevronDown size={16} />
+                  <MdKeyboardArrowDown size={16} />
                 </button>
                 {showOutcomeDropdown && (
                   <div className="dropdown-menu">
@@ -751,22 +792,22 @@ const ResponseChart = ({ searchQuery = '' }) => {
             </div>
             
             <div className="filter-group">
-              <label>Region</label>
+              <label>Time Frame</label>
               <div className="filter-dropdown">
                 <button 
                   className="dropdown-trigger"
-                  onClick={() => toggleDropdown('region')}
+                  onClick={() => toggleDropdown('timeFrame')}
                 >
-                  {regionOptions.find(o => o.value === selectedRegion)?.label || 'Select Region'}
-                  <FiChevronDown size={16} />
+                  {timeFrameOptions.find(o => o.value === selectedTimeFrame)?.label || 'Select Time Frame'}
+                  <MdKeyboardArrowDown size={16} />
                 </button>
-                {showRegionDropdown && (
+                {showTimeFrameDropdown && (
                   <div className="dropdown-menu">
-                    {regionOptions.map(option => (
+                    {timeFrameOptions.map(option => (
                       <div 
                         key={option.value} 
-                        className={`dropdown-item ${selectedRegion === option.value ? 'selected' : ''}`}
-                        onClick={() => handleSelectItem('region', option.value)}
+                        className={`dropdown-item ${selectedTimeFrame === option.value ? 'selected' : ''}`}
+                        onClick={() => handleSelectItem('timeFrame', option.value)}
                       >
                         {option.label}
                       </div>
@@ -779,25 +820,25 @@ const ResponseChart = ({ searchQuery = '' }) => {
           
           <div className="filter-footer">
             <div className="filter-summary">
-              {(timeRange !== '7d' || selectedOutcome !== 'all' || selectedRegion !== 'all') && (
+              {(timeRange !== '7d' || selectedOutcome !== 'all' || selectedTimeFrame !== 'all') && (
                 <div className="active-filters">
                   <span>Active Filters:</span>
                   {timeRange !== '7d' && (
                     <span className="filter-tag">
                       {timeRange === 'custom' ? 'Custom Date Range' : timeRangeOptions.find(o => o.value === timeRange)?.label}
-                      <FiX size={16} onClick={() => setTimeRange('7d')} />
+                      <MdClose size={16} onClick={() => setTimeRange('7d')} />
                     </span>
                   )}
                   {selectedOutcome !== 'all' && (
                     <span className="filter-tag">
                       {selectedOutcome}
-                      <FiX size={16} onClick={() => setSelectedOutcome('all')} />
+                      <MdClose size={16} onClick={() => setSelectedOutcome('all')} />
                     </span>
                   )}
-                  {selectedRegion !== 'all' && (
+                  {selectedTimeFrame !== 'all' && (
                     <span className="filter-tag">
-                      {regionOptions.find(o => o.value === selectedRegion)?.label}
-                      <FiX size={16} onClick={() => setSelectedRegion('all')} />
+                      {timeFrameOptions.find(o => o.value === selectedTimeFrame)?.label}
+                      <MdClose size={16} onClick={() => setSelectedTimeFrame('all')} />
                     </span>
                   )}
                 </div>
@@ -805,7 +846,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
             </div>
             
             <button className="reset-filters" onClick={resetFilters}>
-              <FiRefreshCw size={16} />
+              <MdRefresh size={16} />
               Reset Filters
             </button>
           </div>
@@ -813,6 +854,20 @@ const ResponseChart = ({ searchQuery = '' }) => {
       )}
       
       <div className="chart-legend">
+        {viewMode === 'scatter' && (
+          <>
+            <div className="legend-item">
+              <div className="legend-line target"></div>
+              <span>Target</span>
+            </div>
+            <div className="legend-item">
+              <div className="legend-line average"></div>
+              <span>Average</span>
+            </div>
+          </>
+        )}
+        {viewMode === 'pie' && (
+          <>
         <div className="legend-item">
           <div className="legend-box good"></div>
           <span>Good Response Time (Below Target)</span>
@@ -825,17 +880,13 @@ const ResponseChart = ({ searchQuery = '' }) => {
           <div className="legend-box poor"></div>
           <span>Poor Response Time (More than 50% Above Target)</span>
         </div>
-        {viewMode === 'scatter' && (
-          <div className="legend-item">
-            <div className="legend-line target"></div>
-            <span>Target Response Time</span>
-          </div>
+          </>
         )}
       </div>
 
       {isLoading ? (
         <div className="loading-overlay">
-          <FiRefreshCw className="loading-icon" size={24} />
+          <MdRefresh className="loading-icon" size={24} />
           <div>Updating charts...</div>
         </div>
       ) : viewMode === 'pie' ? (
@@ -845,7 +896,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
           <div className="pie-chart-container">
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
-                {channelIcons.phone}
+                <PhoneIcon />
               </div>
               <h4>Phone</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.phone)}</div>
@@ -882,7 +933,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
           <div className="pie-chart-container">
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
-                {channelIcons.email}
+                <EmailIcon />
               </div>
               <h4>Email</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.email)}</div>
@@ -919,7 +970,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
           <div className="pie-chart-container">
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
-                {channelIcons.linkedin}
+                <LinkedInIcon />
               </div>
               <h4>LinkedIn</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.linkedin)}</div>
@@ -956,7 +1007,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
           <div className="pie-chart-container">
             <div className="pie-chart-header">
               <div className="channel-icon-wrapper">
-                {channelIcons.other}
+                <OtherIcon />
               </div>
               <h4>Others</h4>
               <div className="target-time">Target: {formatResponseTime(targetResponseTimes.other)}</div>
@@ -991,147 +1042,114 @@ const ResponseChart = ({ searchQuery = '' }) => {
         </div>
       ) : (
         // Scatter Plot View
-        <div className="scatter-plot-container">
-          <div className="channel-headers">
-            <div className="channel-header">
-              <div className="channel-icon-wrapper">
-                {channelIcons.phone}
-              </div>
-              <div className="channel-label">Phone</div>
-              <div className="channel-count">{filteredData.phone.length}</div>
-            </div>
-            <div className="channel-header">
-              <div className="channel-icon-wrapper">
-                {channelIcons.email}
-              </div>
-              <div className="channel-label">Email</div>
-              <div className="channel-count">{filteredData.email.length}</div>
-            </div>
-            <div className="channel-header">
-              <div className="channel-icon-wrapper">
-                {channelIcons.linkedin}
-              </div>
-              <div className="channel-label">LinkedIn</div>
-              <div className="channel-count">{filteredData.linkedin.length}</div>
-            </div>
-            <div className="channel-header">
-              <div className="channel-icon-wrapper">
-                {channelIcons.other}
-              </div>
-              <div className="channel-label">Others</div>
-              <div className="channel-count">{filteredData.other.length}</div>
+        <div className="response-metrics-card">
+          <div className="chart-title">
+            <span>Response Performance</span>
+          </div>
+          
+          <div className="response-summary">
+            <div className="response-summary-text">
+              Response times across all channels
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={450}>
-            <ScatterChart
-              margin={{ top: 20, right: 20, bottom: 30, left: 20 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                type="number" 
-                dataKey="x" 
-                name="Date" 
-                domain={xAxisDomain}
-                scale="time"
-                ticks={getDailyTicks}
-                tickFormatter={formatDayOfWeek}
-                tick={{ fontSize: 12, textAnchor: 'end', angle: -30 }}
-                height={50}
-                tickMargin={15}
-                interval={0}
-              />
-              <YAxis 
-                type="number" 
-                dataKey="y" 
-                name="Response Time" 
-                label={{ value: 'Response Time (minutes)', angle: -90, position: 'insideLeft' }}
-                domain={[0, 240]}
-                ticks={getResponseTimeMinuteTicks()}
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => value === 0 ? '0' : `${value}m`}
-              />
-              <ZAxis type="number" dataKey="z" range={[60, 60]} />
-              <Tooltip content={<ScatterTooltip />} />
+          
+          <div className="pg-response-chart">
+            <div className="response-time-axis">
+              <div className="time-label">18h</div>
+              <div className="time-label">12h</div>
+              <div className="time-label">6h</div>
+              <div className="time-label">2h</div>
+              <div className="time-label">1h</div>
+            </div>
+            
+            {/* Global target and average lines */}
+            <div className="global-target-line"></div>
+            <div className="global-average-line"></div>
+            
+            <div className="timeline-container">
+              {/* Channel icons on top */}
+              <div className="channel-icons-row">
+                <div className="channel-icon-wrapper phone-position">
+                  <div className="channel-icon phone-icon">
+                <PhoneIcon />
+              </div>
+              <div className="channel-label">Phone</div>
+            </div>
+                <div className="channel-icon-wrapper email-position">
+                  <div className="channel-icon email-icon">
+                <EmailIcon />
+              </div>
+              <div className="channel-label">Email</div>
+            </div>
+                <div className="channel-icon-wrapper linkedin-position">
+                  <div className="channel-icon linkedin-icon">
+                <LinkedInIcon />
+              </div>
+              <div className="channel-label">LinkedIn</div>
+            </div>
+                <div className="channel-icon-wrapper other-position">
+                  <div className="channel-icon other-icon">
+                <OtherIcon />
+              </div>
+              <div className="channel-label">Others</div>
+            </div>
+          </div>
               
-              {/* Target lines for each channel across the chart */}
-              <ReferenceLine 
-                y={targetResponseTimes.phone} 
-                stroke="red" 
-                strokeWidth={2}
-                isFront={false}
-                ifOverflow="extendDomain" 
-                strokeDasharray="3 3"
-                segment={[
-                  { x: xAxisDomain[0], y: targetResponseTimes.phone },
-                  { x: xAxisDomain[1], y: targetResponseTimes.phone }
-                ]}
-              />
-              
-              <ReferenceLine 
-                y={targetResponseTimes.email} 
-                stroke="red" 
-                strokeWidth={2}
-                isFront={false}
-                ifOverflow="extendDomain"
-                strokeDasharray="3 3"
-                segment={[
-                  { x: xAxisDomain[0], y: targetResponseTimes.email },
-                  { x: xAxisDomain[1], y: targetResponseTimes.email }
-                ]}
-              />
-              
-              <ReferenceLine 
-                y={targetResponseTimes.linkedin} 
-                stroke="red" 
-                strokeWidth={2}
-                isFront={false}
-                ifOverflow="extendDomain"
-                strokeDasharray="3 3"
-                segment={[
-                  { x: xAxisDomain[0], y: targetResponseTimes.linkedin },
-                  { x: xAxisDomain[1], y: targetResponseTimes.linkedin }
-                ]}
-              />
-              
-              <ReferenceLine 
-                y={targetResponseTimes.other} 
-                stroke="red" 
-                strokeWidth={2}
-                isFront={false}
-                ifOverflow="extendDomain"
-                strokeDasharray="3 3"
-                segment={[
-                  { x: xAxisDomain[0], y: targetResponseTimes.other },
-                  { x: xAxisDomain[1], y: targetResponseTimes.other }
-                ]}
-              />
-              
-              {/* Render each channel as a separate scatter series */}
-              <Scatter name="Phone" data={groupedScatterData.phone} fill={COLORS.good}>
-                {groupedScatterData.phone.map((entry, index) => (
-                  <Cell key={`cell-phone-${index}`} fill={getPointColor(entry)} />
-                ))}
-              </Scatter>
-              
-              <Scatter name="Email" data={groupedScatterData.email} fill={COLORS.good}>
-                {groupedScatterData.email.map((entry, index) => (
-                  <Cell key={`cell-email-${index}`} fill={getPointColor(entry)} />
-                ))}
-              </Scatter>
-              
-              <Scatter name="LinkedIn" data={groupedScatterData.linkedin} fill={COLORS.good}>
-                {groupedScatterData.linkedin.map((entry, index) => (
-                  <Cell key={`cell-linkedin-${index}`} fill={getPointColor(entry)} />
-                ))}
-              </Scatter>
-              
-              <Scatter name="Others" data={groupedScatterData.other} fill={COLORS.good}>
-                {groupedScatterData.other.map((entry, index) => (
-                  <Cell key={`cell-other-${index}`} fill={getPointColor(entry)} />
-                ))}
-              </Scatter>
-            </ScatterChart>
-          </ResponsiveContainer>
+              {/* Data points scattered across the timeline */}
+              <div className="dots-container">
+                {/* Phone data points */}
+                <div className="data-dot phone-dot" style={{left: '10%', bottom: '65%'}} data-tooltip="Phone call - Response time: 1h 30m - PG: John Smith - Date: 05/20/25"></div>
+                <div className="data-dot phone-dot" style={{left: '20%', bottom: '20%'}} data-tooltip="Phone call - Response time: 12h 45m - PG: Amy Johnson - Date: 05/27/25"></div>
+                <div className="data-dot phone-dot" style={{left: '40%', bottom: '70%'}} data-tooltip="Phone call - Response time: 1h 10m - PG: Robert Williams - Date: 06/03/25"></div>
+                
+                {/* Email data points */}
+                <div className="data-dot email-dot" style={{left: '28%', bottom: '55%'}} data-tooltip="Email - Response time: 3h 25m - PG: Sarah Miller - Date: 05/27/25"></div>
+                <div className="data-dot email-dot" style={{left: '58%', bottom: '20%'}} data-tooltip="Email - Response time: 12h 10m - PG: David Chen - Date: 06/10/25"></div>
+                <div className="data-dot email-dot" style={{left: '65%', bottom: '35%'}} data-tooltip="Email - Response time: 8h 30m - PG: Michael Brown - Date: 06/17/25"></div>
+                
+                {/* LinkedIn data points */}
+                <div className="data-dot linkedin-dot" style={{left: '46%', bottom: '75%'}} data-tooltip="LinkedIn - Response time: 45m - PG: Jessica Taylor - Date: 06/03/25"></div>
+                <div className="data-dot linkedin-dot" style={{left: '76%', bottom: '80%'}} data-tooltip="LinkedIn - Response time: 35m - PG: Thomas Wilson - Date: 06/17/25"></div>
+                <div className="data-dot linkedin-dot" style={{left: '82%', bottom: '25%'}} data-tooltip="LinkedIn - Response time: 10h 15m - PG: Emily Davis - Date: 06/24/25"></div>
+                
+                {/* Other data points */}
+                <div className="data-dot other-dot" style={{left: '16%', bottom: '15%'}} data-tooltip="Other channel - Response time: 15h 20m - PG: Olivia Lee - Date: 05/20/25"></div>
+                <div className="data-dot other-dot" style={{left: '70%', bottom: '45%'}} data-tooltip="Other channel - Response time: 6h 45m - PG: William Garcia - Date: 06/17/25"></div>
+                <div className="data-dot other-dot" style={{left: '90%', bottom: '85%'}} data-tooltip="Other channel - Response time: 30m - PG: Sophia Martinez - Date: 06/24/25"></div>
+              </div>
+            </div>
+            
+            {/* Visual zone indicators for each channel */}
+            <div className="channel-zones">
+              <div className="channel-zone phone-zone"></div>
+              <div className="channel-zone email-zone"></div>
+              <div className="channel-zone linkedin-zone"></div>
+              <div className="channel-zone other-zone"></div>
+            </div>
+            
+            {/* X-axis with dates in MM/DD/YY format */}
+            <div className="date-axis">
+              <div style={{ position: 'absolute', right: '5px', bottom: '-20px', fontSize: '12px', color: '#64748b' }}>
+                Time →
+              </div>
+              {[
+                "05/20/25",
+                "05/27/25",
+                "06/03/25",
+                "06/10/25",
+                "06/17/25",
+                "06/24/25"
+              ].map((date, index, array) => (
+                <div 
+                  key={`date-${index}`} 
+                  className="date-label"
+                  style={{ left: `${(index / (array.length - 1)) * 100}%` }}
+                >
+                  {date}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -1142,10 +1160,10 @@ const ResponseChart = ({ searchQuery = '' }) => {
             className={`channel-card ${channel.performance}`}
           >
             <div className="channel-icon-container">
-              {channel.channel === 'phone' && <FiPhone size={24} />}
-              {channel.channel === 'email' && <FiMail size={24} />}
-              {channel.channel === 'linkedin' && <FiLinkedin size={24} />}
-              {channel.channel === 'other' && <FiMoreHorizontal size={24} />}
+              {channel.channel === 'phone' && <MdPhone size={24} />}
+              {channel.channel === 'email' && <MdEmail size={24} />}
+              {channel.channel === 'linkedin' && <FaLinkedin size={24} />}
+              {channel.channel === 'other' && <MdMore size={24} />}
             </div>
             <div className="channel-name">{channel.name}</div>
             <div className="channel-value">{formatResponseTime(channel.avg)}</div>

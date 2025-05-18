@@ -752,8 +752,45 @@
 
 .pg-detail-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 1.5rem;
+}
+
+/* Make all three cards take exactly one column */
+.ehr-system-card, .key-tactics-card, .pain-points-card {
+  grid-column: span 1;
+}
+
+/* Adjust the responsive layouts */
+@media (max-width: 1200px) {
+  .pg-detail-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .pg-detail-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .pain-points-card {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .pg-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ehr-system-card, .key-tactics-card, .pain-points-card {
+    grid-column: span 1;
+  }
+  
+  .pg-detail-content {
+    width: 95%;
+    padding: 1rem;
+  }
 }
 
 /* Detail Cards */
@@ -1133,11 +1170,12 @@
 
 /* Growth Metrics Section */
 .growth-metrics-section {
-  background-color: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
   padding: 1.5rem;
-  margin-top: 1.5rem;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Prevent overflow */
 }
 
 .growth-subtitle {
@@ -1288,11 +1326,33 @@ input:not(:checked) + .toggle-label .toggle-option:last-child {
 }
 
 .chart-container {
-  position: relative;
   width: 100%;
   height: 350px;
-  background-color: white;
-  padding: 0;
+  margin-top: 1.5rem;
+  position: relative;
+  overflow: hidden; /* Prevent overflow */
+}
+
+/* Ensure the recharts components stay within bounds */
+.recharts-wrapper {
+  max-width: 100%;
+}
+
+.recharts-surface {
+  overflow: visible;
+}
+
+/* Adjust Y-axis positioning to prevent values from being cut off */
+.recharts-cartesian-axis-tick-value {
+  text-anchor: start;
+}
+
+/* Reduce margin for small screens */
+@media (max-width: 768px) {
+  .chart-container {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+  }
 }
 
 /* Override recharts default styles */
@@ -2548,4 +2608,97 @@ input:not(:checked) + .toggle-label .toggle-option:last-child {
   .side-by-side-item .chart-container {
     height: 300px;
   }
+}
+
+/* Add matching styles for key tactics */
+.key-tactics-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.tactics-list {
+  padding: 1rem;
+}
+
+.tactic-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tactic-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+.tactic-status.completed {
+  color: #10b981;
+}
+
+.tactic-status.pending {
+  color: #f59e0b;
+}
+
+.tactic-content {
+  flex: 1;
+}
+
+.tactic-text {
+  font-size: 0.875rem;
+  color: #334155;
+  margin-bottom: 0.25rem;
+}
+
+.tactic-status-text {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.add-tactic {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #3b82f6;
+  background-color: #f1f5f9;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.add-tactic:hover {
+  background-color: #e2e8f0;
+}
+
+@media (min-width: 1024px) {
+  .key-tactics-card {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .key-tactics-card {
+    grid-column: span 1;
+  }
+}
+
+.side-by-side-item > .growth-metrics-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-by-side-item > .growth-metrics-section .chart-container {
+  flex: 1;
+  min-height: 300px;
+}
+
+.side-by-side-item > .growth-metrics-section .recharts-responsive-container {
+  min-height: 300px !important;
 } 

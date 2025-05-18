@@ -1,9 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import './Card.css';
 
 const ReachOutsCard = ({ data }) => {
-  const [activeTab, setActiveTab] = useState('calls');
-
   // Transform raw data into the format needed by the component
   const processedData = useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) {
@@ -95,62 +93,48 @@ const ReachOutsCard = ({ data }) => {
         <div className="card-value">{processedData.total}</div>
         <div className="card-breakdown">
           <div className="breakdown-item">
-            <div className="breakdown-label">Calls</div>
-            <div className="breakdown-value">{processedData.calls}</div>
+            <div className="breakdown-label calls-color">Calls</div>
+            <div className="breakdown-value">
+              {processedData.calls}
+              <span className="success-rate calls-color">
+                {" "}({processedData.successRates.calls})
+              </span>
+            </div>
           </div>
           <div className="breakdown-item">
-            <div className="breakdown-label">E-mails</div>
-            <div className="breakdown-value">{processedData.emails}</div>
+            <div className="breakdown-label emails-color">E-mails</div>
+            <div className="breakdown-value">
+              {processedData.emails}
+              <span className="success-rate emails-color">
+                {" "}({processedData.successRates.emails})
+              </span>
+            </div>
           </div>
           <div className="breakdown-item">
-            <div className="breakdown-label">LinkedIn</div>
-            <div className="breakdown-value">{processedData.linkedin}</div>
+            <div className="breakdown-label linkedin-color">LinkedIn</div>
+            <div className="breakdown-value">
+              {processedData.linkedin}
+              <span className="success-rate linkedin-color">
+                {" "}({processedData.successRates.linkedin})
+              </span>
+            </div>
           </div>
           <div className="breakdown-item">
-            <div className="breakdown-label">Others</div>
-            <div className="breakdown-value">{processedData.others}</div>
+            <div className="breakdown-label others-color">Others</div>
+            <div className="breakdown-value">
+              {processedData.others}
+              <span className="success-rate others-color">
+                {" "}({processedData.successRates.others})
+              </span>
+            </div>
           </div>
         </div>
       </div>
       
       <div className="metrics-section">
-        <div className="tab-row">
-          <div 
-            className={`tab calls-tab ${activeTab === 'calls' ? 'active' : ''}`}
-            onClick={() => setActiveTab('calls')}
-          >
-            Calls
-          </div>
-          <div 
-            className={`tab emails-tab ${activeTab === 'emails' ? 'active' : ''}`}
-            onClick={() => setActiveTab('emails')}
-          >
-            E-mails
-          </div>
-          <div 
-            className={`tab linkedin-tab ${activeTab === 'linkedin' ? 'active' : ''}`}
-            onClick={() => setActiveTab('linkedin')}
-          >
-            LinkedIn
-          </div>
-          <div 
-            className={`tab others-tab ${activeTab === 'others' ? 'active' : ''}`}
-            onClick={() => setActiveTab('others')}
-          >
-            Others
-          </div>
-        </div>
-        
         <div className="success-rate-container">
           <div className="success-rate-label">Success Rate:</div>
-          <div className="success-rate-value">{activeTab === 'calls' 
-            ? processedData.successRates.calls
-            : activeTab === 'emails' 
-            ? processedData.successRates.emails
-            : activeTab === 'linkedin'
-            ? processedData.successRates.linkedin
-            : processedData.successRates.others}
-          </div>
+          <div className="success-rate-value">{processedData.successRates.overall}</div>
         </div>
       </div>
     </div>

@@ -267,4 +267,39 @@
 .success-rate-value {
   font-weight: 600;
   color: #4364e8;
+}
+
+/* Styles for the success/conversion rate spans */
+.success-rate, .conversion-rate {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.conversion-rate.promoter {
+  color: #22c55e;
+}
+
+.conversion-rate.neutral {
+  color: #f59e0b;
+}
+
+.conversion-rate.blockers {
+  color: #ef4444;
+}
+
+.success-rate.calls-color {
+  color: #2563eb;
+}
+
+.success-rate.emails-color {
+  color: #db2777;
+}
+
+.success-rate.linkedin-color {
+  color: #0369a1;
+}
+
+.success-rate.others-color {
+  color: #7c3aed;
 } 

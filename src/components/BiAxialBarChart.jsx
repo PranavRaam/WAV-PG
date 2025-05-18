@@ -25,21 +25,10 @@ const BiAxialBarChart = ({ data }) => {
         and their associated patient counts. Pink bars represent verticals, blue bars show patient count.
       </div>
       
-      <div className="chart-legend">
-        <div className="legend-item">
-          <span className="legend-dot vertical-dot"></span>
-          <span>Verticals</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-dot patient-dot"></span>
-          <span>No. of patients</span>
-        </div>
-      </div>
-      
       <div className="chart-rows">
         {data.map((item, index) => (
           <div className="chart-row" key={index}>
-            <div className="chart-bars" title={`${item.patients} patients total`}>
+            <div className="chart-bars">
               <div 
                 className="vertical-bar" 
                 style={{ width: `${item.verticalWidth}%` }}
@@ -49,7 +38,6 @@ const BiAxialBarChart = ({ data }) => {
                     <div 
                       className="vertical-block" 
                       key={vIndex} 
-                      title={`${vertical.type} facility in ${vertical.division}, ${vertical.statisticalArea}`}
                       style={{ width: `${getBlockWidthPercentage(item.verticals, vertical)}%` }}
                     >
                       {vertical.type}: {vertical.count}
