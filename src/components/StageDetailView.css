@@ -221,16 +221,31 @@
 }
 
 .pg-table th {
-  padding: 1rem;
-  text-align: left;
+  padding: 0.75rem 1rem;
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background-color: #f8fafc;
+  font-weight: 600;
+  color: #64748b;
+  text-align: left;
   border-bottom: 1px solid #e2e8f0;
-  position: relative;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 2;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.pg-table th:hover {
+  background-color: #f8fafc;
+}
+
+.sort-icon {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  vertical-align: middle;
 }
 
 .pg-table td {
@@ -426,12 +441,15 @@
   min-width: 130px;
 }
 
-.acquisition-score-col {
-  min-width: 120px;
-}
-
-.pg-table th.acquisition-score-col {
-  min-width: 120px;
+.acquisition-score-col,
+.pg-table th.acquisition-score-col,
+.acquisition-score,
+.acquisition-badge,
+.score-value,
+.high-priority,
+.medium-priority,
+.low-priority {
+  /* These styles can be left as they are, but these elements won't be rendered anymore */
 }
 
 .days-in-stage-col {
@@ -1330,7 +1348,30 @@ input:not(:checked) + .toggle-label .toggle-option:last-child {
   height: 350px;
   margin-top: 1.5rem;
   position: relative;
-  overflow: hidden; /* Prevent overflow */
+  overflow: hidden;
+}
+
+.chart-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+  padding-bottom: 5px; /* Add padding to show scrollbar */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #cbd5e1 #f1f5f9; /* For Firefox */
+}
+
+.chart-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.chart-scroll-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.chart-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
 }
 
 /* Ensure the recharts components stay within bounds */

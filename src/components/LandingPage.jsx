@@ -217,78 +217,89 @@ const WAVFunnelPreview = () => {
 const AcquisitionGraph = () => {
   const [timeFilter, setTimeFilter] = useState('quarterly');
   const [verticalFilter, setVerticalFilter] = useState('all');
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 3 }); // Control visible data range
   
   // Target data - representing the target number of PGs to acquire
   // Based on the 77.4% completion with 26 PGs remaining, total target is ~115
   const targetTotal = 115;
-  const targetData = {
-    weekly: [20, 20, 20, 20, 20, 20],
-    monthly: [19, 19, 19, 19, 19, 20],
-    quarterly: [29, 29, 29, 28]
-  };
   
-  // Chart data - representing acquired PGs over time
+  // Chart data - representing acquired PGs over time with specific dates
   const chartData = {
     weekly: {
       all: [
-        { name: 'W1', value: 2, pv: 20, target: targetData.weekly[0] },
-        { name: 'W2', value: 3, pv: 18, target: targetData.weekly[1] },
-        { name: 'W3', value: 4, pv: 16, target: targetData.weekly[2] },
-        { name: 'W4', value: 5, pv: 14, target: targetData.weekly[3] },
-        { name: 'W5', value: 4, pv: 16, target: targetData.weekly[4] },
-        { name: 'W6', value: 6, pv: 12, target: targetData.weekly[5] }
+        { name: '2023-01-02', displayName: 'Jan 2', value: 2, target: 3 },
+        { name: '2023-01-09', displayName: 'Jan 9', value: 3, target: 3 },
+        { name: '2023-01-16', displayName: 'Jan 16', value: 4, target: 3 },
+        { name: '2023-01-23', displayName: 'Jan 23', value: 5, target: 3 },
+        { name: '2023-01-30', displayName: 'Jan 30', value: 4, target: 3 },
+        { name: '2023-02-06', displayName: 'Feb 6', value: 6, target: 3 },
+        { name: '2023-02-13', displayName: 'Feb 13', value: 5, target: 3 },
+        { name: '2023-02-20', displayName: 'Feb 20', value: 7, target: 3 },
+        { name: '2023-02-27', displayName: 'Feb 27', value: 8, target: 3 },
+        { name: '2023-03-06', displayName: 'Mar 6', value: 6, target: 3 },
+        { name: '2023-03-13', displayName: 'Mar 13', value: 9, target: 3 },
+        { name: '2023-03-20', displayName: 'Mar 20', value: 7, target: 3 }
       ],
       chc: [
-        { name: 'W1', value: 1, pv: 20, target: targetData.weekly[0] },
-        { name: 'W2', value: 2, pv: 18, target: targetData.weekly[1] },
-        { name: 'W3', value: 3, pv: 16, target: targetData.weekly[2] },
-        { name: 'W4', value: 3, pv: 14, target: targetData.weekly[3] },
-        { name: 'W5', value: 2, pv: 16, target: targetData.weekly[4] },
-        { name: 'W6', value: 4, pv: 12, target: targetData.weekly[5] }
+        // Similar structure with CHC specific data
+        { name: '2023-01-02', displayName: 'Jan 2', value: 1, target: 2 },
+        { name: '2023-01-09', displayName: 'Jan 9', value: 2, target: 2 },
+        // ... more weeks
       ]
     },
     monthly: {
       all: [
-        { name: 'Jan', value: 4, pv: 20, target: targetData.monthly[0] },
-        { name: 'Feb', value: 5, pv: 18, target: targetData.monthly[1] },
-        { name: 'Mar', value: 7, pv: 16, target: targetData.monthly[2] },
-        { name: 'Apr', value: 8, pv: 14, target: targetData.monthly[3] },
-        { name: 'May', value: 10, pv: 12, target: targetData.monthly[4] },
-        { name: 'Jun', value: 12, pv: 10, target: targetData.monthly[5] }
+        { name: '2023-01-01', displayName: 'Jan 2023', value: 4, target: 8 },
+        { name: '2023-02-01', displayName: 'Feb 2023', value: 5, target: 8 },
+        { name: '2023-03-01', displayName: 'Mar 2023', value: 7, target: 8 },
+        { name: '2023-04-01', displayName: 'Apr 2023', value: 8, target: 8 },
+        { name: '2023-05-01', displayName: 'May 2023', value: 10, target: 9 },
+        { name: '2023-06-01', displayName: 'Jun 2023', value: 12, target: 9 },
+        { name: '2023-07-01', displayName: 'Jul 2023', value: 14, target: 9 },
+        { name: '2023-08-01', displayName: 'Aug 2023', value: 15, target: 9 },
+        { name: '2023-09-01', displayName: 'Sep 2023', value: 16, target: 9 },
+        { name: '2023-10-01', displayName: 'Oct 2023', value: 18, target: 9 },
+        { name: '2023-11-01', displayName: 'Nov 2023', value: 19, target: 9 },
+        { name: '2023-12-01', displayName: 'Dec 2023', value: 21, target: 9 }
       ],
       chc: [
-        { name: 'Jan', value: 3, pv: 20, target: targetData.monthly[0] },
-        { name: 'Feb', value: 4, pv: 18, target: targetData.monthly[1] },
-        { name: 'Mar', value: 5, pv: 16, target: targetData.monthly[2] },
-        { name: 'Apr', value: 6, pv: 14, target: targetData.monthly[3] },
-        { name: 'May', value: 7, pv: 12, target: targetData.monthly[4] },
-        { name: 'Jun', value: 8, pv: 10, target: targetData.monthly[5] }
+        // Similar structure with CHC specific data
+        { name: '2023-01-01', displayName: 'Jan 2023', value: 3, target: 6 },
+        { name: '2023-02-01', displayName: 'Feb 2023', value: 4, target: 6 },
+        // ... more months
       ]
     },
     quarterly: {
       all: [
-        { name: 'Q1', value: 12, pv: 20, target: targetData.quarterly[0] },
-        { name: 'Q2', value: 16, pv: 16, target: targetData.quarterly[1] },
-        { name: 'Q3', value: 19, pv: 12, target: targetData.quarterly[2] },
-        { name: 'Q4', value: 23, pv: 8, target: targetData.quarterly[3] }
+        { name: '2022-01-01', displayName: 'Q1 2022', value: 8, target: 12 },
+        { name: '2022-04-01', displayName: 'Q2 2022', value: 10, target: 12 },
+        { name: '2022-07-01', displayName: 'Q3 2022', value: 14, target: 15 },
+        { name: '2022-10-01', displayName: 'Q4 2022', value: 18, target: 15 },
+        { name: '2023-01-01', displayName: 'Q1 2023', value: 22, target: 18 },
+        { name: '2023-04-01', displayName: 'Q2 2023', value: 28, target: 18 },
+        { name: '2023-07-01', displayName: 'Q3 2023', value: 35, target: 20 },
+        { name: '2023-10-01', displayName: 'Q4 2023', value: 42, target: 20 },
+        { name: '2024-01-01', displayName: 'Q1 2024', value: 55, target: 25 },
+        { name: '2024-04-01', displayName: 'Q2 2024', value: 62, target: 25 },
+        { name: '2024-07-01', displayName: 'Q3 2024', value: 70, target: 28 }
       ],
       chc: [
-        { name: 'Q1', value: 8, pv: 20, target: targetData.quarterly[0] },
-        { name: 'Q2', value: 10, pv: 16, target: targetData.quarterly[1] },
-        { name: 'Q3', value: 12, pv: 12, target: targetData.quarterly[2] },
-        { name: 'Q4', value: 15, pv: 8, target: targetData.quarterly[3] }
+        // Similar structure with CHC specific data
+        { name: '2022-01-01', displayName: 'Q1 2022', value: 5, target: 8 },
+        { name: '2022-04-01', displayName: 'Q2 2022', value: 7, target: 8 },
+        // ... more quarters
       ],
       primary: [
-        { name: 'Q1', value: 3, pv: 20, target: targetData.quarterly[0] },
-        { name: 'Q2', value: 5, pv: 16, target: targetData.quarterly[1] },
-        { name: 'Q3', value: 6, pv: 12, target: targetData.quarterly[2] },
-        { name: 'Q4', value: 7, pv: 8, target: targetData.quarterly[3] }
+        // Similar structure with Primary specific data
+        { name: '2022-01-01', displayName: 'Q1 2022', value: 2, target: 3 },
+        { name: '2022-04-01', displayName: 'Q2 2022', value: 3, target: 3 },
+        // ... more quarters
       ],
       geriatrics: [
-        { name: 'Q1', value: 1, pv: 20, target: targetData.quarterly[0] },
-        { name: 'Q2', value: 1, pv: 16, target: targetData.quarterly[1] },
-        { name: 'Q3', value: 1, pv: 12, target: targetData.quarterly[2] },
-        { name: 'Q4', value: 1, pv: 8, target: targetData.quarterly[3] }
+        // Similar structure with Geriatrics specific data
+        { name: '2022-01-01', displayName: 'Q1 2022', value: 1, target: 1 },
+        { name: '2022-04-01', displayName: 'Q2 2022', value: 1, target: 1 },
+        // ... more quarters
       ]
     }
   };
@@ -296,15 +307,47 @@ const AcquisitionGraph = () => {
   // Get current data based on filters
   const currentData = chartData[timeFilter]?.[verticalFilter] || chartData[timeFilter]?.all;
   
+  // Calculate visible data slice based on current range
+  const visibleData = currentData.slice(visibleRange.start, visibleRange.end + 1);
+  
   // Total PGs acquired in current view
   const totalAcquired = currentData.reduce((sum, point) => sum + point.value, 0);
+  
+  // Scrolling controls
+  const handleScrollLeft = () => {
+    if (visibleRange.start > 0) {
+      setVisibleRange({
+        start: visibleRange.start - 1,
+        end: visibleRange.end - 1
+      });
+    }
+  };
+  
+  const handleScrollRight = () => {
+    if (visibleRange.end < currentData.length - 1) {
+      setVisibleRange({
+        start: visibleRange.start + 1,
+        end: visibleRange.end + 1
+      });
+    }
+  };
+  
+  // Reset visible range when changing filters
+  React.useEffect(() => {
+    const visiblePoints = timeFilter === 'weekly' ? 6 : 4; // Show more points in weekly view
+    setVisibleRange({
+      start: 0,
+      end: Math.min(visiblePoints - 1, currentData.length - 1)
+    });
+  }, [timeFilter, verticalFilter, currentData.length]);
   
   // Custom tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
+      const dataPoint = currentData.find(item => item.name === label);
       return (
         <div className="recharts-custom-tooltip">
-          <p className="tooltip-label">{`${label}`}</p>
+          <p className="tooltip-label">{dataPoint?.displayName || label}</p>
           <p className="tooltip-value">{`Acquired PGs: ${payload[0].value}`}</p>
           <p className="tooltip-value">{`Target PGs: ${payload[1].value}`}</p>
         </div>
@@ -354,82 +397,104 @@ const AcquisitionGraph = () => {
       </div>
       
       <div className="graph-visualization recharts-wrapper">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart
-            data={currentData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+        <div className="scroll-controls">
+          <button 
+            className="scroll-btn left" 
+            onClick={handleScrollLeft}
+            disabled={visibleRange.start === 0}
           >
-            <defs>
-              <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
-                <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0.01}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              vertical={false} 
-              stroke="#f1f5f9" 
-            />
-            <XAxis 
-              dataKey="name" 
-              axisLine={{ stroke: '#94a3b8', strokeWidth: 1 }}
-              tick={{ fill: '#64748b', fontSize: 12 }}
-              tickLine={{ stroke: '#94a3b8' }}
-            />
-            <YAxis 
-              axisLine={{ stroke: '#94a3b8', strokeWidth: 1 }}
-              tick={{ fill: '#64748b', fontSize: 12 }}
-              tickLine={{ stroke: '#94a3b8' }}
-              domain={[0, 'dataMax + 5']}
-              label={{ 
-                value: 'PGs Acquired', 
-                angle: -90, 
-                position: 'insideLeft',
-                style: { textAnchor: 'middle', fill: '#64748b', fontSize: 12 },
-                offset: -5
-              }}
-            />
-            <Tooltip 
-              content={<CustomTooltip />} 
-              cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '5 5' }}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="value" 
-              stroke="none"
-              fillOpacity={1}
-              fill="url(#colorValue)" 
-            />
-            <Line 
-              type="monotone" 
-              dataKey="value" 
-              stroke="var(--color-primary)" 
-              strokeWidth={2.5}
-              dot={{ 
-                stroke: 'var(--color-primary)', 
-                strokeWidth: 2, 
-                r: 4,
-                fill: '#fff'
-              }}
-              activeDot={{ 
-                stroke: 'var(--color-primary)', 
-                strokeWidth: 2, 
-                r: 6,
-                fill: '#fff'
-              }}
-            />
-            
-            {/* Target line */}
-            <Line 
-              type="monotone" 
-              dataKey="target" 
-              stroke="var(--color-danger)"
-              strokeWidth={2}
-              strokeDasharray="4 4"
-              dot={false}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+            &lt;
+          </button>
+          
+          <ResponsiveContainer width="90%" height="100%">
+            <ComposedChart
+              data={visibleData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+            >
+              <defs>
+                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0.01}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                vertical={false} 
+                stroke="#f1f5f9" 
+              />
+              <XAxis 
+                dataKey="name" 
+                axisLine={{ stroke: '#94a3b8', strokeWidth: 1 }}
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                tickLine={{ stroke: '#94a3b8' }}
+                tickFormatter={(value) => {
+                  const dataPoint = currentData.find(item => item.name === value);
+                  return dataPoint?.displayName || value;
+                }}
+              />
+              <YAxis 
+                axisLine={{ stroke: '#94a3b8', strokeWidth: 1 }}
+                tick={{ fill: '#64748b', fontSize: 12 }}
+                tickLine={{ stroke: '#94a3b8' }}
+                domain={[0, 'dataMax + 5']}
+                label={{ 
+                  value: 'PGs Acquired', 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle', fill: '#64748b', fontSize: 12 },
+                  offset: -5
+                }}
+              />
+              <Tooltip 
+                content={<CustomTooltip />} 
+                cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '5 5' }}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke="none"
+                fillOpacity={1}
+                fill="url(#colorValue)" 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="value" 
+                stroke="var(--color-primary)" 
+                strokeWidth={2.5}
+                dot={{ 
+                  stroke: 'var(--color-primary)', 
+                  strokeWidth: 2, 
+                  r: 4,
+                  fill: '#fff'
+                }}
+                activeDot={{ 
+                  stroke: 'var(--color-primary)', 
+                  strokeWidth: 2, 
+                  r: 6,
+                  fill: '#fff'
+                }}
+              />
+              
+              {/* Target line */}
+              <Line 
+                type="monotone" 
+                dataKey="target" 
+                stroke="var(--color-danger)"
+                strokeWidth={2}
+                strokeDasharray="4 4"
+                dot={false}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+          
+          <button 
+            className="scroll-btn right" 
+            onClick={handleScrollRight}
+            disabled={visibleRange.end >= currentData.length - 1}
+          >
+            &gt;
+          </button>
+        </div>
         
         <div className="milestone-legend">
           <div className="legend-item">
@@ -643,17 +708,6 @@ const LandingPage = ({ onNavigate }) => {
             </div>
             <div className="graph-preview">
               <AcquisitionGraph />
-            </div>
-          </div>
-          
-          <div className="dashboard-pill">
-            <div className="pill-item">
-              <span className="pill-label">Target Progress:</span>
-              <span className="pill-value">77.4%</span>
-            </div>
-            <div className="pill-item">
-              <span className="pill-label">Remaining:</span>
-              <span className="pill-value">26 PGs</span>
             </div>
           </div>
           

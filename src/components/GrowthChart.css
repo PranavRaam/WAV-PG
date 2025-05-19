@@ -350,4 +350,258 @@
     align-items: flex-start;
     gap: 10px;
   }
+}
+
+/* Add styles for scroll controls */
+.scroll-controls {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.scroll-btn {
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  color: #64748b;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.scroll-btn:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+.scroll-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.scroll-btn.left {
+  margin-right: 10px;
+}
+
+.scroll-btn.right {
+  margin-left: 10px;
+}
+
+.scroll-indicator {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+/* Existing or modified styles */
+.growth-chart-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  max-width: 100%;
+}
+
+.growth-chart-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-group label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.chart-filter {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.kpi-info {
+  font-size: 0.85rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.kpi-description {
+  padding: 0.25rem 0.5rem;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+}
+
+.time-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toggle-button {
+  padding: 0.4rem 0.8rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-button.active {
+  background-color: #e0f2fe;
+  border-color: #7dd3fc;
+  color: #0284c7;
+  font-weight: 500;
+}
+
+.toggle-button:hover:not(.active) {
+  background-color: #f1f5f9;
+}
+
+.chart-wrapper {
+  margin: 1.5rem 0;
+  height: 400px;
+}
+
+.custom-tooltip {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-label {
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.tooltip-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.tooltip-color-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+}
+
+.tooltip-stage {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.tooltip-hint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.legend-label {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.kpi-tooltip {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  min-width: 250px;
+  max-width: 320px;
+  z-index: 100;
+}
+
+.tooltip-header {
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.tooltip-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.tooltip-list li {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.chart-info-box {
+  background-color: #f8fafc;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.info-header {
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info-content {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .growth-chart-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .chart-filter {
+    width: 100%;
+  }
+  
+  .time-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
 } 

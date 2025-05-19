@@ -59,6 +59,21 @@
   border-left: 1px solid #e2e8f0;
 }
 
+.breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.breakdown-header-label, 
+.breakdown-header-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
 .breakdown-item {
   display: flex;
   justify-content: space-between;
@@ -249,24 +264,55 @@
 /* Success Rate Container */
 .success-rate-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 12px;
-  padding: 8px 16px;
-  background-color: #f5f7fa;
-  border-radius: 6px;
-  font-size: 16px;
+  flex-direction: column;
+  background-color: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.rate-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
 }
 
 .success-rate-label {
-  font-weight: 500;
-  color: #5a5f6d;
-  margin-right: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
 }
 
-.success-rate-value {
+.rate-values {
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #4364e8;
+}
+
+.success-value {
+  color: #22c55e;
+  margin-right: 0.75rem;
+}
+
+.failure-value {
+  color: #ef4444;
+}
+
+.conversion-bars {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #e2e8f0;
+}
+
+.success-bar {
+  background-color: #22c55e;
+  height: 100%;
+}
+
+.failure-bar {
+  background-color: #ef4444;
+  height: 100%;
 }
 
 /* Styles for the success/conversion rate spans */
@@ -302,4 +348,71 @@
 
 .success-rate.others-color {
   color: #7c3aed;
+}
+
+/* Conversion Rate Box */
+.conversion-rate-box {
+  background-color: #f8fafc;
+  border-radius: 6px;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.conversion-rate-labels {
+  margin-bottom: 0.5rem;
+}
+
+.conversion-rate-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.conversion-rate-values {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.success-rate-box, .failure-rate-box {
+  text-align: center;
+}
+
+.rate-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.rate-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.rate-value.success {
+  color: #22c55e;
+}
+
+.rate-value.failure {
+  color: #ef4444;
+}
+
+.conversion-bars {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #e2e8f0;
+}
+
+.success-bar {
+  background-color: #22c55e;
+  height: 100%;
+}
+
+.failure-bar {
+  background-color: #ef4444;
+  height: 100%;
 } 

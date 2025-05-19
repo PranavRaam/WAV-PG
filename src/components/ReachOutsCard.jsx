@@ -92,6 +92,10 @@ const ReachOutsCard = ({ data }) => {
       <div className="card-top">
         <div className="card-value">{processedData.total}</div>
         <div className="card-breakdown">
+          <div className="breakdown-header">
+            <div className="breakdown-header-label">Channel</div>
+            <div className="breakdown-header-value">Count (Success Rate)</div>
+          </div>
           <div className="breakdown-item">
             <div className="breakdown-label calls-color">Calls</div>
             <div className="breakdown-value">

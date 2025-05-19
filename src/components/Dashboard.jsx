@@ -296,7 +296,7 @@ const Dashboard = ({ onNavigateBack }) => {
             
             <div className="card response-card">
               <div className="card-header">
-                <h2>Customer Success</h2>
+                <h2>Response Performance</h2>
                 <div className="card-subtitle">Response rates by division</div>
               </div>
               <div className="card-content">

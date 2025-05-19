@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiX, FiSearch, FiChevronDown, FiInfo, FiArrowRight, FiCheck, FiUser, FiExternalLink, FiPhone, FiMail, FiLinkedin, FiMoreHorizontal, FiCalendar, FiPlus, FiClock, FiCheckCircle, FiFileText, FiUsers, FiTarget, FiRefreshCw } from 'react-icons/fi';
+import { FiX, FiSearch, FiChevronDown, FiInfo, FiArrowRight, FiCheck, FiUser, FiExternalLink, FiPhone, FiMail, FiLinkedin, FiMoreHorizontal, FiCalendar, FiPlus, FiClock, FiCheckCircle, FiFileText, FiUsers, FiTarget, FiRefreshCw, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { MdLocalHospital } from 'react-icons/md';
 import './StageDetailView.css';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
@@ -55,6 +55,12 @@ const StageDetailView = ({ stage, onClose }) => {
     dueDate: '',
     type: 'follow-up',
     description: ''
+  });
+  
+  // Add sorting state
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: 'asc'
   });
   
   // Mock data for the PG details
@@ -204,17 +210,65 @@ const StageDetailView = ({ stage, onClose }) => {
     return matchesSearch && matchesStage && matchesMSA && matchesVertical && matchesTrustScore;
   });
   
-  // Get stats for the top summary cards based on filtered data
-  const totalPatients = filteredPGs.reduce((sum, pg) => sum + pg.patients, 0);
-  const practitioners = {
-    total: filteredPGs.reduce((sum, pg) => sum + pg.practitioners.md + pg.practitioners.npp, 0),
-    md: filteredPGs.reduce((sum, pg) => sum + pg.practitioners.md, 0),
-    npp: filteredPGs.reduce((sum, pg) => sum + pg.practitioners.npp, 0)
+  // Add sorting function
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
   };
-  const avgTrustScore = filteredPGs.length > 0 
-    ? Math.round(filteredPGs.reduce((sum, pg) => sum + pg.trustScore, 0) / filteredPGs.length)
+  
+  // Apply sorting to filtered data
+  const sortedPGs = React.useMemo(() => {
+    let sortablePGs = [...filteredPGs];
+    if (sortConfig.key) {
+      sortablePGs.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+        
+        // Handle special cases for nested objects or formatted values
+        if (sortConfig.key === 'practitioners') {
+          aValue = a.practitioners.md + (a.practitioners.npp || 0);
+          bValue = b.practitioners.md + (b.practitioners.npp || 0);
+        } else if (sortConfig.key === 'engagementROI') {
+          // Convert percentage string to number
+          aValue = parseInt(a.engagementROI);
+          bValue = parseInt(b.engagementROI);
+        }
+        
+        // Compare values
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortablePGs;
+  }, [filteredPGs, sortConfig]);
+  
+  // Helper function to get sort icon
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) {
+      return null;
+    }
+    return sortConfig.direction === 'asc' ? <FiArrowUp className="sort-icon" /> : <FiArrowDown className="sort-icon" />;
+  };
+  
+  // Get stats for the top summary cards based on filtered data
+  const totalPatients = sortedPGs.reduce((sum, pg) => sum + pg.patients, 0);
+  const practitioners = {
+    total: sortedPGs.reduce((sum, pg) => sum + pg.practitioners.md + pg.practitioners.npp, 0),
+    md: sortedPGs.reduce((sum, pg) => sum + pg.practitioners.md, 0),
+    npp: sortedPGs.reduce((sum, pg) => sum + pg.practitioners.npp, 0)
+  };
+  const avgTrustScore = sortedPGs.length > 0 
+    ? Math.round(sortedPGs.reduce((sum, pg) => sum + pg.trustScore, 0) / sortedPGs.length)
     : 0;
-  const bigShotPGs = filteredPGs.filter(pg => pg.acquisitionScore >= 85).length;
+  const bigShotPGs = sortedPGs.filter(pg => pg.acquisitionScore >= 85).length;
   
   // Mock EHR data for PG details
   const ehrSystems = {
@@ -367,116 +421,116 @@ const StageDetailView = ({ stage, onClose }) => {
   const mockPGMetricsData = {
     1: { // Miami Primary Care
       quarter: [
-        { name: 'Q1', 'Patients': 3200, 'TrustScore': 65, 'Engagement': 35 },
-        { name: 'Q2', 'Patients': 4100, 'TrustScore': 72, 'Engagement': 48 },
-        { name: 'Q3', 'Patients': 4800, 'TrustScore': 78, 'Engagement': 62 },
-        { name: 'Q4', 'Patients': 5200, 'TrustScore': 84, 'Engagement': 75 }
+        { name: 'Q1', date: '2023-01-01', 'Patients': 3200, 'TrustScore': 65, 'Engagement': 35 },
+        { name: 'Q2', date: '2023-04-01', 'Patients': 4100, 'TrustScore': 72, 'Engagement': 48 },
+        { name: 'Q3', date: '2023-07-01', 'Patients': 4800, 'TrustScore': 78, 'Engagement': 62 },
+        { name: 'Q4', date: '2023-10-01', 'Patients': 5200, 'TrustScore': 84, 'Engagement': 75 }
       ],
       month: [
-        { name: 'Jan', 'Patients': 3200, 'TrustScore': 65, 'Engagement': 35 },
-        { name: 'Feb', 'Patients': 3400, 'TrustScore': 67, 'Engagement': 38 },
-        { name: 'Mar', 'Patients': 3600, 'TrustScore': 68, 'Engagement': 40 },
-        { name: 'Apr', 'Patients': 3800, 'TrustScore': 70, 'Engagement': 42 },
-        { name: 'May', 'Patients': 4100, 'TrustScore': 72, 'Engagement': 48 },
-        { name: 'Jun', 'Patients': 4300, 'TrustScore': 74, 'Engagement': 52 },
-        { name: 'Jul', 'Patients': 4500, 'TrustScore': 75, 'Engagement': 55 },
-        { name: 'Aug', 'Patients': 4800, 'TrustScore': 78, 'Engagement': 62 },
-        { name: 'Sep', 'Patients': 4900, 'TrustScore': 80, 'Engagement': 65 },
-        { name: 'Oct', 'Patients': 5000, 'TrustScore': 82, 'Engagement': 70 },
-        { name: 'Nov', 'Patients': 5100, 'TrustScore': 83, 'Engagement': 72 },
-        { name: 'Dec', 'Patients': 5200, 'TrustScore': 84, 'Engagement': 75 }
+        { name: 'Jan', date: '2023-01-01', 'Patients': 3200, 'TrustScore': 65, 'Engagement': 35 },
+        { name: 'Feb', date: '2023-02-01', 'Patients': 3400, 'TrustScore': 67, 'Engagement': 38 },
+        { name: 'Mar', date: '2023-03-01', 'Patients': 3600, 'TrustScore': 68, 'Engagement': 40 },
+        { name: 'Apr', date: '2023-04-01', 'Patients': 3800, 'TrustScore': 70, 'Engagement': 42 },
+        { name: 'May', date: '2023-05-01', 'Patients': 4100, 'TrustScore': 72, 'Engagement': 48 },
+        { name: 'Jun', date: '2023-06-01', 'Patients': 4300, 'TrustScore': 74, 'Engagement': 52 },
+        { name: 'Jul', date: '2023-07-01', 'Patients': 4500, 'TrustScore': 75, 'Engagement': 55 },
+        { name: 'Aug', date: '2023-08-01', 'Patients': 4800, 'TrustScore': 78, 'Engagement': 62 },
+        { name: 'Sep', date: '2023-09-01', 'Patients': 4900, 'TrustScore': 80, 'Engagement': 65 },
+        { name: 'Oct', date: '2023-10-01', 'Patients': 5000, 'TrustScore': 82, 'Engagement': 70 },
+        { name: 'Nov', date: '2023-11-01', 'Patients': 5100, 'TrustScore': 83, 'Engagement': 72 },
+        { name: 'Dec', date: '2023-12-01', 'Patients': 5200, 'TrustScore': 84, 'Engagement': 75 }
       ],
       week: [
-        { name: 'W1', 'Patients': 5150, 'TrustScore': 83, 'Engagement': 73 },
-        { name: 'W2', 'Patients': 5170, 'TrustScore': 83, 'Engagement': 73 },
-        { name: 'W3', 'Patients': 5180, 'TrustScore': 84, 'Engagement': 74 },
-        { name: 'W4', 'Patients': 5200, 'TrustScore': 84, 'Engagement': 75 }
+        { name: 'W1', date: '2023-11-05', 'Patients': 5150, 'TrustScore': 83, 'Engagement': 73 },
+        { name: 'W2', date: '2023-11-12', 'Patients': 5170, 'TrustScore': 83, 'Engagement': 73 },
+        { name: 'W3', date: '2023-11-19', 'Patients': 5180, 'TrustScore': 84, 'Engagement': 74 },
+        { name: 'W4', date: '2023-11-26', 'Patients': 5200, 'TrustScore': 84, 'Engagement': 75 }
       ]
     },
     2: { // Sunshine Pediatrics
       quarter: [
-        { name: 'Q1', 'Patients': 2200, 'TrustScore': 60, 'Engagement': 30 },
-        { name: 'Q2', 'Patients': 2800, 'TrustScore': 68, 'Engagement': 40 },
-        { name: 'Q3', 'Patients': 3400, 'TrustScore': 72, 'Engagement': 45 },
-        { name: 'Q4', 'Patients': 3800, 'TrustScore': 76, 'Engagement': 53 }
+        { name: 'Q1', date: '2023-01-01', 'Patients': 2200, 'TrustScore': 60, 'Engagement': 30 },
+        { name: 'Q2', date: '2023-04-01', 'Patients': 2800, 'TrustScore': 68, 'Engagement': 40 },
+        { name: 'Q3', date: '2023-07-01', 'Patients': 3400, 'TrustScore': 72, 'Engagement': 45 },
+        { name: 'Q4', date: '2023-10-01', 'Patients': 3800, 'TrustScore': 76, 'Engagement': 53 }
       ],
       month: [
-        { name: 'Jan', 'Patients': 2200, 'TrustScore': 60, 'Engagement': 30 },
-        { name: 'Feb', 'Patients': 2400, 'TrustScore': 62, 'Engagement': 32 },
-        { name: 'Mar', 'Patients': 2600, 'TrustScore': 65, 'Engagement': 35 },
-        { name: 'Apr', 'Patients': 2800, 'TrustScore': 68, 'Engagement': 40 },
-        { name: 'May', 'Patients': 3000, 'TrustScore': 70, 'Engagement': 42 },
-        { name: 'Jun', 'Patients': 3100, 'TrustScore': 70, 'Engagement': 42 },
-        { name: 'Jul', 'Patients': 3200, 'TrustScore': 71, 'Engagement': 43 },
-        { name: 'Aug', 'Patients': 3400, 'TrustScore': 72, 'Engagement': 45 },
-        { name: 'Sep', 'Patients': 3500, 'TrustScore': 73, 'Engagement': 48 },
-        { name: 'Oct', 'Patients': 3600, 'TrustScore': 74, 'Engagement': 50 },
-        { name: 'Nov', 'Patients': 3700, 'TrustScore': 75, 'Engagement': 52 },
-        { name: 'Dec', 'Patients': 3800, 'TrustScore': 76, 'Engagement': 53 }
+        { name: 'Jan', date: '2023-01-01', 'Patients': 2200, 'TrustScore': 60, 'Engagement': 30 },
+        { name: 'Feb', date: '2023-02-01', 'Patients': 2400, 'TrustScore': 62, 'Engagement': 32 },
+        { name: 'Mar', date: '2023-03-01', 'Patients': 2600, 'TrustScore': 65, 'Engagement': 35 },
+        { name: 'Apr', date: '2023-04-01', 'Patients': 2800, 'TrustScore': 68, 'Engagement': 40 },
+        { name: 'May', date: '2023-05-01', 'Patients': 3000, 'TrustScore': 70, 'Engagement': 42 },
+        { name: 'Jun', date: '2023-06-01', 'Patients': 3100, 'TrustScore': 70, 'Engagement': 42 },
+        { name: 'Jul', date: '2023-07-01', 'Patients': 3200, 'TrustScore': 71, 'Engagement': 43 },
+        { name: 'Aug', date: '2023-08-01', 'Patients': 3400, 'TrustScore': 72, 'Engagement': 45 },
+        { name: 'Sep', date: '2023-09-01', 'Patients': 3500, 'TrustScore': 73, 'Engagement': 48 },
+        { name: 'Oct', date: '2023-10-01', 'Patients': 3600, 'TrustScore': 74, 'Engagement': 50 },
+        { name: 'Nov', date: '2023-11-01', 'Patients': 3700, 'TrustScore': 75, 'Engagement': 52 },
+        { name: 'Dec', date: '2023-12-01', 'Patients': 3800, 'TrustScore': 76, 'Engagement': 53 }
       ],
       week: [
-        { name: 'W1', 'Patients': 3750, 'TrustScore': 75, 'Engagement': 52 },
-        { name: 'W2', 'Patients': 3760, 'TrustScore': 75, 'Engagement': 52 },
-        { name: 'W3', 'Patients': 3780, 'TrustScore': 76, 'Engagement': 53 },
-        { name: 'W4', 'Patients': 3800, 'TrustScore': 76, 'Engagement': 53 }
+        { name: 'W1', date: '2023-11-05', 'Patients': 3750, 'TrustScore': 75, 'Engagement': 52 },
+        { name: 'W2', date: '2023-11-12', 'Patients': 3760, 'TrustScore': 75, 'Engagement': 52 },
+        { name: 'W3', date: '2023-11-19', 'Patients': 3780, 'TrustScore': 76, 'Engagement': 53 },
+        { name: 'W4', date: '2023-11-26', 'Patients': 3800, 'TrustScore': 76, 'Engagement': 53 }
       ]
     },
     // Add similar data for other PGs (3-6)
     3: { // Coral Gables Cardiology
       quarter: [
-        { name: 'Q1', 'Patients': 1500, 'TrustScore': 78, 'Engagement': 60 },
-        { name: 'Q2', 'Patients': 1800, 'TrustScore': 85, 'Engagement': 72 },
-        { name: 'Q3', 'Patients': 2000, 'TrustScore': 90, 'Engagement': 85 },
-        { name: 'Q4', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 }
+        { name: 'Q1', date: '2023-01-01', 'Patients': 1500, 'TrustScore': 78, 'Engagement': 60 },
+        { name: 'Q2', date: '2023-04-01', 'Patients': 1800, 'TrustScore': 85, 'Engagement': 72 },
+        { name: 'Q3', date: '2023-07-01', 'Patients': 2000, 'TrustScore': 90, 'Engagement': 85 },
+        { name: 'Q4', date: '2023-10-01', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 }
       ],
       month: [
-        { name: 'Jan', 'Patients': 1500, 'TrustScore': 78, 'Engagement': 60 },
-        { name: 'Feb', 'Patients': 1600, 'TrustScore': 80, 'Engagement': 65 },
-        { name: 'Mar', 'Patients': 1700, 'TrustScore': 82, 'Engagement': 68 },
-        { name: 'Apr', 'Patients': 1800, 'TrustScore': 85, 'Engagement': 72 },
-        { name: 'May', 'Patients': 1850, 'TrustScore': 87, 'Engagement': 75 },
-        { name: 'Jun', 'Patients': 1900, 'TrustScore': 88, 'Engagement': 78 },
-        { name: 'Jul', 'Patients': 1950, 'TrustScore': 89, 'Engagement': 80 },
-        { name: 'Aug', 'Patients': 2000, 'TrustScore': 90, 'Engagement': 85 },
-        { name: 'Sep', 'Patients': 2050, 'TrustScore': 91, 'Engagement': 88 },
-        { name: 'Oct', 'Patients': 2080, 'TrustScore': 91, 'Engagement': 88 },
-        { name: 'Nov', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 },
-        { name: 'Dec', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 }
+        { name: 'Jan', date: '2023-01-01', 'Patients': 1500, 'TrustScore': 78, 'Engagement': 60 },
+        { name: 'Feb', date: '2023-02-01', 'Patients': 1600, 'TrustScore': 80, 'Engagement': 65 },
+        { name: 'Mar', date: '2023-03-01', 'Patients': 1700, 'TrustScore': 82, 'Engagement': 68 },
+        { name: 'Apr', date: '2023-04-01', 'Patients': 1800, 'TrustScore': 85, 'Engagement': 72 },
+        { name: 'May', date: '2023-05-01', 'Patients': 1850, 'TrustScore': 87, 'Engagement': 75 },
+        { name: 'Jun', date: '2023-06-01', 'Patients': 1900, 'TrustScore': 88, 'Engagement': 78 },
+        { name: 'Jul', date: '2023-07-01', 'Patients': 1950, 'TrustScore': 89, 'Engagement': 80 },
+        { name: 'Aug', date: '2023-08-01', 'Patients': 2000, 'TrustScore': 90, 'Engagement': 85 },
+        { name: 'Sep', date: '2023-09-01', 'Patients': 2050, 'TrustScore': 91, 'Engagement': 88 },
+        { name: 'Oct', date: '2023-10-01', 'Patients': 2080, 'TrustScore': 91, 'Engagement': 88 },
+        { name: 'Nov', date: '2023-11-01', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 },
+        { name: 'Dec', date: '2023-12-01', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 }
       ],
       week: [
-        { name: 'W1', 'Patients': 2080, 'TrustScore': 91, 'Engagement': 88 },
-        { name: 'W2', 'Patients': 2090, 'TrustScore': 91, 'Engagement': 89 },
-        { name: 'W3', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 },
-        { name: 'W4', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 }
+        { name: 'W1', date: '2023-11-05', 'Patients': 2080, 'TrustScore': 91, 'Engagement': 88 },
+        { name: 'W2', date: '2023-11-12', 'Patients': 2090, 'TrustScore': 91, 'Engagement': 89 },
+        { name: 'W3', date: '2023-11-19', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 },
+        { name: 'W4', date: '2023-11-26', 'Patients': 2100, 'TrustScore': 92, 'Engagement': 90 }
       ]
     },
     // Add data for PG 7
     7: { // Bayfront Medical Group
       quarter: [
-        { name: 'Q1', 'Patients': 2800, 'TrustScore': 70, 'Engagement': 45 },
-        { name: 'Q2', 'Patients': 3200, 'TrustScore': 75, 'Engagement': 55 },
-        { name: 'Q3', 'Patients': 3700, 'TrustScore': 80, 'Engagement': 65 },
-        { name: 'Q4', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
+        { name: 'Q1', date: '2023-01-01', 'Patients': 2800, 'TrustScore': 70, 'Engagement': 45 },
+        { name: 'Q2', date: '2023-04-01', 'Patients': 3200, 'TrustScore': 75, 'Engagement': 55 },
+        { name: 'Q3', date: '2023-07-01', 'Patients': 3700, 'TrustScore': 80, 'Engagement': 65 },
+        { name: 'Q4', date: '2023-10-01', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
       ],
       month: [
-        { name: 'Jan', 'Patients': 2800, 'TrustScore': 70, 'Engagement': 45 },
-        { name: 'Feb', 'Patients': 2900, 'TrustScore': 71, 'Engagement': 48 },
-        { name: 'Mar', 'Patients': 3000, 'TrustScore': 72, 'Engagement': 50 },
-        { name: 'Apr', 'Patients': 3200, 'TrustScore': 75, 'Engagement': 55 },
-        { name: 'May', 'Patients': 3300, 'TrustScore': 76, 'Engagement': 58 },
-        { name: 'Jun', 'Patients': 3400, 'TrustScore': 77, 'Engagement': 60 },
-        { name: 'Jul', 'Patients': 3500, 'TrustScore': 78, 'Engagement': 62 },
-        { name: 'Aug', 'Patients': 3700, 'TrustScore': 80, 'Engagement': 65 },
-        { name: 'Sep', 'Patients': 3800, 'TrustScore': 80, 'Engagement': 66 },
-        { name: 'Oct', 'Patients': 3900, 'TrustScore': 81, 'Engagement': 68 },
-        { name: 'Nov', 'Patients': 4000, 'TrustScore': 82, 'Engagement': 69 },
-        { name: 'Dec', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
+        { name: 'Jan', date: '2023-01-01', 'Patients': 2800, 'TrustScore': 70, 'Engagement': 45 },
+        { name: 'Feb', date: '2023-02-01', 'Patients': 2900, 'TrustScore': 71, 'Engagement': 48 },
+        { name: 'Mar', date: '2023-03-01', 'Patients': 3000, 'TrustScore': 72, 'Engagement': 50 },
+        { name: 'Apr', date: '2023-04-01', 'Patients': 3200, 'TrustScore': 75, 'Engagement': 55 },
+        { name: 'May', date: '2023-05-01', 'Patients': 3300, 'TrustScore': 76, 'Engagement': 58 },
+        { name: 'Jun', date: '2023-06-01', 'Patients': 3400, 'TrustScore': 77, 'Engagement': 60 },
+        { name: 'Jul', date: '2023-07-01', 'Patients': 3500, 'TrustScore': 78, 'Engagement': 62 },
+        { name: 'Aug', date: '2023-08-01', 'Patients': 3700, 'TrustScore': 80, 'Engagement': 65 },
+        { name: 'Sep', date: '2023-09-01', 'Patients': 3800, 'TrustScore': 80, 'Engagement': 66 },
+        { name: 'Oct', date: '2023-10-01', 'Patients': 3900, 'TrustScore': 81, 'Engagement': 68 },
+        { name: 'Nov', date: '2023-11-01', 'Patients': 4000, 'TrustScore': 82, 'Engagement': 69 },
+        { name: 'Dec', date: '2023-12-01', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
       ],
       week: [
-        { name: 'W1', 'Patients': 4000, 'TrustScore': 81, 'Engagement': 68 },
-        { name: 'W2', 'Patients': 4050, 'TrustScore': 82, 'Engagement': 69 },
-        { name: 'W3', 'Patients': 4080, 'TrustScore': 82, 'Engagement': 69 },
-        { name: 'W4', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
+        { name: 'W1', date: '2023-11-05', 'Patients': 4000, 'TrustScore': 81, 'Engagement': 68 },
+        { name: 'W2', date: '2023-11-12', 'Patients': 4050, 'TrustScore': 82, 'Engagement': 69 },
+        { name: 'W3', date: '2023-11-19', 'Patients': 4080, 'TrustScore': 82, 'Engagement': 69 },
+        { name: 'W4', date: '2023-11-26', 'Patients': 4100, 'TrustScore': 82, 'Engagement': 70 }
       ]
     }
   };
@@ -484,18 +538,30 @@ const StageDetailView = ({ stage, onClose }) => {
   // Add default data for any PG that might not have specific data
   const defaultPGMetrics = {
     quarter: [
-      { name: 'Q1', 'Patients': 1000, 'TrustScore': 50, 'Engagement': 20 },
-      { name: 'Q2', 'Patients': 1200, 'TrustScore': 55, 'Engagement': 25 },
-      { name: 'Q3', 'Patients': 1400, 'TrustScore': 60, 'Engagement': 30 },
-      { name: 'Q4', 'Patients': 1500, 'TrustScore': 65, 'Engagement': 35 }
+      { name: 'Q1', date: '2023-01-01', 'Patients': 1000, 'TrustScore': 50, 'Engagement': 20 },
+      { name: 'Q2', date: '2023-04-01', 'Patients': 1200, 'TrustScore': 55, 'Engagement': 25 },
+      { name: 'Q3', date: '2023-07-01', 'Patients': 1400, 'TrustScore': 60, 'Engagement': 30 },
+      { name: 'Q4', date: '2023-10-01', 'Patients': 1500, 'TrustScore': 65, 'Engagement': 35 }
     ],
     month: [
-      { name: 'Jan', 'Patients': 1000, 'TrustScore': 50, 'Engagement': 20 },
-      { name: 'Dec', 'Patients': 1500, 'TrustScore': 65, 'Engagement': 35 }
+      { name: 'Jan', date: '2023-01-01', 'Patients': 1000, 'TrustScore': 50, 'Engagement': 20 },
+      { name: 'Feb', date: '2023-02-01', 'Patients': 1050, 'TrustScore': 52, 'Engagement': 22 },
+      { name: 'Mar', date: '2023-03-01', 'Patients': 1100, 'TrustScore': 54, 'Engagement': 24 },
+      { name: 'Apr', date: '2023-04-01', 'Patients': 1150, 'TrustScore': 56, 'Engagement': 26 },
+      { name: 'May', date: '2023-05-01', 'Patients': 1200, 'TrustScore': 58, 'Engagement': 27 },
+      { name: 'Jun', date: '2023-06-01', 'Patients': 1250, 'TrustScore': 59, 'Engagement': 28 },
+      { name: 'Jul', date: '2023-07-01', 'Patients': 1300, 'TrustScore': 60, 'Engagement': 29 },
+      { name: 'Aug', date: '2023-08-01', 'Patients': 1350, 'TrustScore': 61, 'Engagement': 30 },
+      { name: 'Sep', date: '2023-09-01', 'Patients': 1400, 'TrustScore': 62, 'Engagement': 31 },
+      { name: 'Oct', date: '2023-10-01', 'Patients': 1450, 'TrustScore': 63, 'Engagement': 33 },
+      { name: 'Nov', date: '2023-11-01', 'Patients': 1475, 'TrustScore': 64, 'Engagement': 34 },
+      { name: 'Dec', date: '2023-12-01', 'Patients': 1500, 'TrustScore': 65, 'Engagement': 35 }
     ],
     week: [
-      { name: 'W1', 'Patients': 1450, 'TrustScore': 63, 'Engagement': 33 },
-      { name: 'W4', 'Patients': 1500, 'TrustScore': 65, 'Engagement': 35 }
+      { name: 'W1', date: '2023-11-05', 'Patients': 1450, 'TrustScore': 63, 'Engagement': 33 },
+      { name: 'W2', date: '2023-11-12', 'Patients': 1465, 'TrustScore': 64, 'Engagement': 34 },
+      { name: 'W3', date: '2023-11-19', 'Patients': 1485, 'TrustScore': 64, 'Engagement': 34 },
+      { name: 'W4', date: '2023-11-26', 'Patients': 1500, 'TrustScore': 65, 'Engagement': 35 }
     ]
   };
   
@@ -1321,6 +1387,24 @@ const StageDetailView = ({ stage, onClose }) => {
     setShowAddTaskModal(false);
   };
   
+  // Add a function to format dates for the chart
+  const formatChartDate = (date, timeRange) => {
+    if (!date) return '';
+    
+    const dateObj = new Date(date);
+    
+    switch (timeRange) {
+      case 'quarter':
+        return `Q${Math.floor(dateObj.getMonth() / 3) + 1} ${dateObj.getFullYear()}`;
+      case 'month':
+        return dateObj.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+      case 'week':
+        return dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      default:
+        return date;
+    }
+  };
+  
   return (
     <div className="stage-detail-container">
       {!selectedPG ? (
@@ -1504,41 +1588,38 @@ const StageDetailView = ({ stage, onClose }) => {
             <table className="pg-table">
               <thead>
                 <tr>
-                  <th className="pg-name-col">
-                    PG Name <FiInfo className="info-icon" />
+                  <th className="pg-name-col" onClick={() => handleSort('name')}>
+                    PG Name {getSortIcon('name')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="msa-col">
-                    MSA <FiInfo className="info-icon" />
+                  <th className="msa-col" onClick={() => handleSort('msa')}>
+                    MSA {getSortIcon('msa')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="vertical-col">
-                    Vertical <FiInfo className="info-icon" />
+                  <th className="vertical-col" onClick={() => handleSort('vertical')}>
+                    Vertical {getSortIcon('vertical')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="stage-col">
-                    Stage <FiInfo className="info-icon" />
+                  <th className="stage-col" onClick={() => handleSort('stage')}>
+                    Stage {getSortIcon('stage')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="days-in-stage-col">
-                    Days in Stage <FiInfo className="info-icon" />
+                  <th className="days-in-stage-col" onClick={() => handleSort('daysInStage')}>
+                    Days in Stage {getSortIcon('daysInStage')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="patients-col">
-                    Patients <FiInfo className="info-icon" />
+                  <th className="patients-col" onClick={() => handleSort('patients')}>
+                    Patients {getSortIcon('patients')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="practitioners-col">
-                    Practitioners <FiInfo className="info-icon" />
+                  <th className="practitioners-col" onClick={() => handleSort('practitioners')}>
+                    Practitioners {getSortIcon('practitioners')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="trust-score-col">
-                    Trust Score <FiInfo className="info-icon" />
+                  <th className="trust-score-col" onClick={() => handleSort('trustScore')}>
+                    Trust Score {getSortIcon('trustScore')} <FiInfo className="info-icon" />
                   </th>
-                  <th className="engagement-col">
-                    Engagement <FiInfo className="info-icon" />
-                  </th>
-                  <th className="acquisition-score-col">
-                    Acquisition Score <span className="priority-indicator">🔥</span> <FiInfo className="info-icon" />
+                  <th className="engagement-col" onClick={() => handleSort('engagementROI')}>
+                    Engagement {getSortIcon('engagementROI')} <FiInfo className="info-icon" />
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPGs.length > 0 ? (
-                  filteredPGs.map(pg => (
+                {sortedPGs.length > 0 ? (
+                  sortedPGs.map(pg => (
                     <tr key={pg.id}>
                       <td className="pg-name-col">
                         <div 
@@ -1630,22 +1711,11 @@ const StageDetailView = ({ stage, onClose }) => {
                           </div>
                         </div>
                       </td>
-                      <td className="acquisition-score-col">
-                        <div className="acquisition-score">
-                          <span 
-                            className={`acquisition-badge ${getAcquisitionScoreIndicator(pg.acquisitionScore).className}`}
-                            title={getAcquisitionScoreIndicator(pg.acquisitionScore).label}
-                          >
-                            {getAcquisitionScoreIndicator(pg.acquisitionScore).icon}
-                          </span>
-                          <span className="score-value">{pg.acquisitionScore}</span>
-                        </div>
-                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="10" className="empty-table-message">No results match your filters</td>
+                    <td colSpan="9" className="empty-table-message">No results match your filters</td>
                   </tr>
                 )}
               </tbody>
@@ -1882,52 +1952,56 @@ const StageDetailView = ({ stage, onClose }) => {
                   ))}
                 </div>
                 
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height={350}>
-                    <LineChart
-                      data={selectedPG ? (mockPGMetricsData[selectedPG.id] || defaultPGMetrics)[selectedTimeRange] || [] : []}
-                      margin={{ top: 10, right: 10, left: 5, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#64748b', fontSize: 12 }}
-                      />
-                      <YAxis 
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#64748b', fontSize: 12 }}
-                        domain={['auto', 'auto']}
-                        allowDataOverflow={false}
-                        padding={{ top: 20, bottom: 20 }}
-                      />
-                      <Tooltip 
-                        formatter={(value, name) => [`${value}${name === 'TrustScore' ? '/100' : name === 'Engagement' ? ' min' : ''}`, name]}
-                        labelFormatter={(label) => `${label}`}
-                        contentStyle={{
-                          backgroundColor: 'white',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '6px',
-                          padding: '8px 12px'
-                        }}
-                      />
-                      
-                      {/* PG-specific metrics lines */}
-                      {Object.entries(pgMetricsColors).map(([metric, color]) => (
-                        <Line
-                          key={metric}
-                          type="monotone"
-                          dataKey={metric}
-                          stroke={color}
-                          strokeWidth={2}
-                          dot={{ r: 4, fill: color, stroke: color }}
-                          activeDot={{ r: 6 }}
+                <div className="chart-scroll-container">
+                  <div className="chart-container">
+                    <ResponsiveContainer width={selectedTimeRange === 'month' ? 1200 : 800} height={350}>
+                      <LineChart
+                        data={selectedPG ? (mockPGMetricsData[selectedPG.id] || defaultPGMetrics)[selectedTimeRange] || [] : []}
+                        margin={{ top: 10, right: 30, left: 5, bottom: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis 
+                          dataKey="date" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#64748b', fontSize: 12 }}
+                          tickFormatter={(value) => formatChartDate(value, selectedTimeRange)}
+                          padding={{ left: 20, right: 20 }}
                         />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
+                        <YAxis 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#64748b', fontSize: 12 }}
+                          domain={['auto', 'auto']}
+                          allowDataOverflow={false}
+                          padding={{ top: 20, bottom: 20 }}
+                        />
+                        <Tooltip 
+                          formatter={(value, name) => [`${value}${name === 'TrustScore' ? '/100' : name === 'Engagement' ? ' min' : ''}`, name]}
+                          labelFormatter={(value) => formatChartDate(value, selectedTimeRange)}
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '6px',
+                            padding: '8px 12px'
+                          }}
+                        />
+                        
+                        {/* PG-specific metrics lines */}
+                        {Object.entries(pgMetricsColors).map(([metric, color]) => (
+                          <Line
+                            key={metric}
+                            type="monotone"
+                            dataKey={metric}
+                            stroke={color}
+                            strokeWidth={2}
+                            dot={{ r: 4, fill: color, stroke: color }}
+                            activeDot={{ r: 6 }}
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             </div>

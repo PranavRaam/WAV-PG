@@ -46,8 +46,9 @@ const ConnectionsCard = ({ data }) => {
     
     // Calculate conversion rates
     const calculateConversionRate = (successes, attempts) => {
-      if (!attempts) return '0%';
-      return `${Math.round((successes / attempts) * 100)}%`;
+      if (!attempts) return { success: 0, failure: 0 };
+      const successRate = Math.round((successes / attempts) * 100);
+      return { success: successRate, failure: 100 - successRate };
     };
 
     const conversionRates = {
@@ -81,12 +82,16 @@ const ConnectionsCard = ({ data }) => {
       <div className="card-top">
         <div className="card-value">{processedData.total}</div>
         <div className="card-breakdown">
+          <div className="breakdown-header">
+            <div className="breakdown-header-label">Attitude Type</div>
+            <div className="breakdown-header-value">Count (Success/Failure)</div>
+          </div>
           <div className="breakdown-item">
             <div className="breakdown-label promoter">Promoters</div>
             <div className="breakdown-value">
               {processedData.promoters} 
               <span className="conversion-rate promoter">
-                {" "}({processedData.conversionRates.promoters})
+                {" "}(S:{processedData.conversionRates.promoters.success} F:{processedData.conversionRates.promoters.failure})
               </span>
             </div>
           </div>
@@ -95,7 +100,7 @@ const ConnectionsCard = ({ data }) => {
             <div className="breakdown-value">
               {processedData.neutral}
               <span className="conversion-rate neutral">
-                {" "}({processedData.conversionRates.neutral})
+                {" "}(S:{processedData.conversionRates.neutral.success} F:{processedData.conversionRates.neutral.failure})
               </span>
             </div>
           </div>
@@ -104,7 +109,7 @@ const ConnectionsCard = ({ data }) => {
             <div className="breakdown-value">
               {processedData.blockers}
               <span className="conversion-rate blockers">
-                {" "}({processedData.conversionRates.blockers})
+                {" "}(S:{processedData.conversionRates.blockers.success} F:{processedData.conversionRates.blockers.failure})
               </span>
             </div>
           </div>
@@ -112,9 +117,30 @@ const ConnectionsCard = ({ data }) => {
       </div>
       
       <div className="metrics-section">
-        <div className="success-rate-container">
-          <div className="success-rate-label">Conversion Rate:</div>
-          <div className="success-rate-value">{processedData.conversionRates.overall}</div>
+        <div className="conversion-rate-box">
+          <div className="conversion-rate-labels">
+            <div className="conversion-rate-label">Conversion Rate:</div>
+          </div>
+          <div className="conversion-rate-values">
+            <div className="success-rate-box">
+              <div className="rate-label">Success</div>
+              <div className="rate-value success">{processedData.conversionRates.overall.success}%</div>
+            </div>
+            <div className="failure-rate-box">
+              <div className="rate-label">Failure</div>
+              <div className="rate-value failure">{processedData.conversionRates.overall.failure}%</div>
+            </div>
+          </div>
+          <div className="conversion-bars">
+            <div 
+              className="success-bar"
+              style={{ width: `${processedData.conversionRates.overall.success}%` }}
+            ></div>
+            <div 
+              className="failure-bar"
+              style={{ width: `${processedData.conversionRates.overall.failure}%` }}
+            ></div>
+          </div>
         </div>
       </div>
     </div>

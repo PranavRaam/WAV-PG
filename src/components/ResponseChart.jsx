@@ -623,41 +623,25 @@ const ResponseChart = ({ searchQuery = '' }) => {
   
   // Helper to check if chart has no data
   const hasNoData = (data) => {
-    return data.every(item => item.value === 0);
+    return !data || Object.keys(data).length === 0 || data.count === 0;
   };
 
-  // Calculate point color based on performance vs target (minutes)
+  // Get point color based on response time for scatter plot
   const getPointColor = (entry) => {
-    if (entry.channel === 'phone') {
-      return entry.responseTime <= targetResponseTimes.phone 
-        ? 'var(--color-success)' 
-        : entry.responseTime <= targetResponseTimes.phone * 1.5 
-          ? 'var(--color-warning)' 
-          : 'var(--color-danger)';
-    } else if (entry.channel === 'email') {
-      return entry.responseTime <= targetResponseTimes.email 
-        ? 'var(--color-success)' 
-        : entry.responseTime <= targetResponseTimes.email * 1.5 
-          ? 'var(--color-warning)' 
-          : 'var(--color-danger)';
-    } else if (entry.channel === 'linkedin') {
-      return entry.responseTime <= targetResponseTimes.linkedin 
-        ? 'var(--color-success)' 
-        : entry.responseTime <= targetResponseTimes.linkedin * 1.5 
-          ? 'var(--color-warning)' 
-          : 'var(--color-danger)';
+    if (!entry) return '#ccc';
+    const channel = entry.channel.toLowerCase();
+    const target = targetResponseTimes[channel];
+    if (!target) return '#ccc';
+    
+    const responseTime = entry.responseTime; // in minutes
+    
+    if (responseTime <= target) {
+      return '#22c55e'; // good - below target
+    } else if (responseTime <= target * 1.5) {
+      return '#f59e0b'; // average - up to 50% above target
     } else {
-      return entry.responseTime <= targetResponseTimes.other 
-        ? 'var(--color-success)' 
-        : entry.responseTime <= targetResponseTimes.other * 1.5 
-          ? 'var(--color-warning)' 
-          : 'var(--color-danger)';
+      return '#ef4444'; // poor - more than 50% above target
     }
-  };
-
-  // Toggle between visualization modes
-  const toggleViewMode = () => {
-    setViewMode(viewMode === 'pie' ? 'scatter' : 'pie');
   };
 
   // Define Y-axis ticks for hours
@@ -665,7 +649,7 @@ const ResponseChart = ({ searchQuery = '' }) => {
     // Return values to show hours: 1h, 2h, 6h, 12h, 18h
     return [0, 60, 120, 360, 720, 1080];
   };
-
+  
   // Handle selection of a dropdown item
   const handleSelectItem = (dropdownName, value) => {
     switch (dropdownName) {
@@ -747,8 +731,6 @@ const ResponseChart = ({ searchQuery = '' }) => {
             <MdBarChart size={24} style={{color: viewMode === 'scatter' ? '#2563eb' : '#64748b', display: 'block'}} />
           </button>
         </div>
-        
-        <h2 className="chart-title">Response Performance</h2>
         
         <div className="filter-actions">
           <button 
@@ -901,6 +883,16 @@ const ResponseChart = ({ searchQuery = '' }) => {
         </div>
       )}
       
+      <div className="chart-section-divider">
+        <div className="line-with-icon">
+          <div className="line"></div>
+          <div className="icon-wrapper">
+            {viewMode === 'pie' ? <MdPieChart size={18} /> : <MdBarChart size={18} />}
+          </div>
+          <div className="line"></div>
+        </div>
+      </div>
+
       <div className="chart-legend">
         {viewMode === 'scatter' && (
           <>
@@ -1091,9 +1083,6 @@ const ResponseChart = ({ searchQuery = '' }) => {
       ) : (
         // Scatter Plot View
         <div className="response-metrics-card">
-          <div className="chart-title">
-            <span>Response Performance</span>
-          </div>
           
           <div className="response-summary">
             <div className="response-summary-text">
